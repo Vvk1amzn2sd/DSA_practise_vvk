@@ -70,7 +70,7 @@
   </header>
 
   <div class="auth-section">
-    <input type="text" id="username" placeholder="Username (6 characters)" maxlength="6">
+    <input type="text" id="username" placeholder="Username must be exactly 6 letters long" maxlength="6">
     <button onclick="loginUser()">Login</button>
   </div>
 
@@ -110,7 +110,6 @@
 
   <script>
     let startTime = null;
-    let timerInterval;
 
     function loginUser() {
       const username = document.getElementById("username").value.trim();
@@ -168,11 +167,9 @@
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Leaders/${fileName}`;
 
       fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error("Leaderboard not found.");
-          return res.text();
-        })
+        .then(res => res.ok ? res.text() : "")
         .then(text => {
+          if (!text.trim()) return;
           const lines = text.trim().split("\n");
           for (const line of lines) {
             const [name, time] = line.split(',');
@@ -180,12 +177,6 @@
             row.insertCell(0).textContent = name;
             row.insertCell(1).textContent = time;
           }
-        })
-        .catch(err => {
-          const row = table.insertRow();
-          const cell = row.insertCell(0);
-          cell.colSpan = 2;
-          cell.textContent = "❌ " + err.message;
         });
     }
 
