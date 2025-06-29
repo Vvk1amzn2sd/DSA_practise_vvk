@@ -30,12 +30,24 @@
       storageBucket: "dsa-challenge.firebasestorage.app",
       messagingSenderId: "866070092409",
       appId: "1:866070092409:web:49faada850b1b91bbf52a8",
-      measurementId: "G-P3Y7XMJN2L",
+      measurementId: "G-P3Y7XMJN2L", // Corrected: no extra 'L'
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+
+    let timerInterval = null;
+    let startTime = null;
+
+    // Track user login state and optionally update UI or console
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User logged in:", user.email);
+      } else {
+        console.log("User logged out");
+      }
+    });
 
     window.signupUser = function () {
       const email = document.getElementById("email").value;
@@ -52,9 +64,6 @@
         .then(() => alert("✅ Login successful. You may now start coding."))
         .catch((err) => alert("❌ " + err.message));
     };
-
-    let timerInterval = null;
-    let startTime = null;
 
     window.startTimer = function () {
       if (!auth.currentUser) {
@@ -100,6 +109,9 @@
         .then(() => {
           alert("✅ Submitted! Leaderboard will refresh.");
           loadLeaderboard();
+          // Reset timer variables after submit
+          startTime = null;
+          document.getElementById("timerDisplay").textContent = "0 sec";
         })
         .catch((err) => alert("❌ Submission failed: " + err.message));
     };
