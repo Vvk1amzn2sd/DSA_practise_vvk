@@ -5,14 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
   <style>
-    /* ... existing styles ... */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: white;
+      color: black;
+    }
+
+    header {
+      background-color: #f4f4f4;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .auth-section {
+      text-align: center;
+      margin: 10px;
+    }
+
+    .main-section {
+      display: flex;
+      flex-direction: row;
+      height: 70vh;
+    }
+
+    .left-panel {
+      width: 50%;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .right-panel {
+      width: 50%;
+      padding: 10px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #leaderboard-section {
+      margin-top: 20px;
+      padding: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <!-- ... existing HTML structure ... -->
+  <header>
+    <h1>DSA Challenge Hub</h1>
+  </header>
+
+  <div class="auth-section">
+    <input type="text" id="username" placeholder="Username (6 characters)" maxlength="6">
+    <button onclick="loginUser()">Login</button>
+  </div>
+
+  <div class="auth-section">
+    <input type="date" id="datePicker" onchange="loadQuestionByDate()">
+    <select id="category" onchange="loadQuestionByDate()">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </div>
+
+  <div class="main-section">
+    <div class="left-panel">
+      <h2>Challenge</h2>
+      <pre id="daily-question">Loading...</pre>
+    </div>
+    <div class="right-panel">
+      <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight"></iframe>
+    </div>
+  </div>
+
+  <div class="auth-section">
+    <button onclick="startTimer()">Start</button>
+    <button onclick="submitSolution()">Submit</button>
+  </div>
+
+  <div id="leaderboard-section">
+    <h2>Leaderboard</h2>
+    <table id="leaderboard">
+      <thead>
+        <tr><th>Name</th><th>Time</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
-    // ... existing functions ...
+    let startTime = null;
+    let timerInterval;
+
+    function loginUser() {
+      const username = document.getElementById("username").value.trim();
+      if (username.length === 6) {
+        localStorage.setItem("dsaUsername", username);
+        alert("✅ You may now start coding. Check the question and press Start to begin.");
+      } else {
+        alert("❌ Username must be exactly 6 characters.");
+      }
+    }
+
+    function startTimer() {
+      startTime = new Date();
+      alert("✅ Timer started.");
+    }
+
+    function addToLeaderboard(name, time) {
+      const table = document.getElementById("leaderboard").querySelector("tbody");
+      const row = table.insertRow();
+      row.insertCell(0).textContent = name;
+      row.insertCell(1).textContent = time;
+    }
+
+    function loadQuestionByDate() {
+      const selectedDate = document.getElementById("datePicker").value;
+      const category = document.getElementById("category").value.toLowerCase();
+      const dateObj = new Date(selectedDate);
+      const day = dateObj.getDate();
+      const month = dateObj.toLocaleString('default', { month: 'long' }).toUpperCase();
+      const filename = `Day${day}_${month}.txt`;
+      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error("Question not found.");
+          return res.text();
+        })
+        .then(text => {
+          document.getElementById("daily-question").textContent = text;
+          loadLeaderboard();
+        })
+        .catch(err => {
+          document.getElementById("daily-question").textContent = "❌ " + err.message;
+        });
+    }
 
     function loadLeaderboard() {
       const table = document.getElementById("leaderboard").querySelector("tbody");
@@ -34,10 +177,8 @@
           for (const line of lines) {
             const [name, time] = line.split(',');
             const row = table.insertRow();
-            const nameCell = row.insertCell(0);
-            const timeCell = row.insertCell(1);
-            nameCell.textContent = name;
-            timeCell.textContent = time;
+            row.insertCell(0).textContent = name;
+            row.insertCell(1).textContent = time;
           }
         })
         .catch(err => {
@@ -54,8 +195,6 @@
         alert("❌ Please login and start the timer before submitting.");
         return;
       }
-
-      clearInterval(timerInterval);
 
       const endTime = new Date();
       const timeTakenMin = ((endTime - startTime) / 60000).toFixed(2);
@@ -102,10 +241,12 @@
       }
 
       try {
-        const solRes = await pushFile(solutionPath, solution);
-        const lbRes = await fetch(`https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/${leaderboardPath}`)
-          .then(res => res.ok ? res.text() : "")
-          .then(existing => pushFile(leaderboardPath, existing + leaderboardEntry));
+        await pushFile(solutionPath, solution);
+
+        const existing = await fetch(`https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/${leaderboardPath}`)
+          .then(res => res.ok ? res.text() : "");
+
+        await pushFile(leaderboardPath, existing + leaderboardEntry);
 
         alert("✅ Solution submitted successfully.");
         addToLeaderboard(username, `${timeTakenMin} min`);
@@ -113,8 +254,6 @@
         alert("❌ Submission failed: " + error.message);
       }
     }
-
-    // ... other functions ...
   </script>
 </body>
 </html>
