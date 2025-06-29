@@ -25,18 +25,24 @@
     .dark-mode select,
     .dark-mode h1,
     .dark-mode h2,
+    .dark-mode h3,
     .dark-mode label,
     .dark-mode p,
     .dark-mode th,
-    .dark-mode td {
-      background-color: #2a2a2a;
-      color: #f1f1f1;
+    .dark-mode td,
+    .dark-mode pre {
+      background-color: #2a2a2a !important;
+      color: #f1f1f1 !important;
     }
 
     header {
       text-align: center;
       padding: 5px;
       background-color: #f4f4f4;
+    }
+
+    .dark-mode header {
+      background-color: #1e1e1e;
     }
 
     header h1 {
@@ -120,6 +126,10 @@
       text-align: center;
     }
 
+    .dark-mode footer {
+      background-color: #1e1e1e;
+    }
+
     #leaderboard-section {
       margin-top: 20px;
       padding: 20px;
@@ -148,6 +158,11 @@
       width: 70%;
       background: #f9f9f9;
       padding: 10px;
+    }
+
+    .dark-mode .paiza-input,
+    .dark-mode .paiza-output {
+      background: #2a2a2a;
     }
   </style>
 </head>
@@ -271,7 +286,7 @@
       const endTime = new Date();
       const timeTakenMin = ((endTime - startTime) / 60000).toFixed(2);
 
-      const token = "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";
+      const token = "YOUR_GITHUB_TOKEN";
       const repo = "Vvk1amzn2sd/DSA_practise_vvk";
       const branch = "main";
       const date = new Date().toISOString().slice(0, 10);
