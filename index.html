@@ -71,7 +71,7 @@
     iframe {
       flex: 1;
       width: 100%;
-      height: calc(100vh - 200px);
+      height: 100%;
       border: none;
     }
 
@@ -164,7 +164,7 @@
   </div>
 
   <footer>
-    <p>Made with ♥ by vvk</p>
+    <p>Designed with ♥ by vvk</p>
   </footer>
 
   <script>
@@ -189,8 +189,7 @@
 
       const dateObj = new Date(selectedDate);
       const day = dateObj.getDate();
-      const month = dateObj.toLocaleString('default', { month: 'long' });
-      const filename = `${day}_${month}_Day1_${category}.txt`;
+      const filename = `Day${day}.txt`;
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
 
       try {
