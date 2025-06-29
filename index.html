@@ -92,7 +92,7 @@
     iframe {
       flex: 1;
       width: 100%;
-      height: 500px;
+      height: 700px;
       border: none;
     }
 
@@ -144,7 +144,13 @@
     .ide-controls {
       display: flex;
       justify-content: space-between;
-      margin-top: 5px;
+      align-items: center;
+      padding: 10px;
+    }
+
+    #timerDisplay {
+      font-weight: bold;
+      font-size: 1rem;
     }
   </style>
 </head>
@@ -192,11 +198,12 @@
     </div>
 
     <div class="right-panel">
-      <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
       <div class="ide-controls">
         <button onclick="startTimer()">▶️ Start</button>
+        <span id="timerDisplay">00:00</span>
         <button onclick="submitSolution()" id="submitButton" disabled>📤 Submit</button>
       </div>
+      <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
     </div>
   </div>
 
@@ -206,6 +213,7 @@
 
   <script>
     let startTime = null;
+    let timerInterval = null;
 
     function toggleMode() {
       document.body.classList.toggle("dark-mode");
@@ -216,10 +224,21 @@
       if (username.length === 6) {
         startTime = new Date();
         document.getElementById("submitButton").disabled = false;
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
         alert("✅ Timer started. You may now submit your solution.");
       } else {
         alert("❌ Username must be exactly 6 characters long.");
       }
+    }
+
+    function updateTimer() {
+      if (!startTime) return;
+      const now = new Date();
+      const seconds = Math.floor((now - startTime) / 1000);
+      const minutes = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      document.getElementById("timerDisplay").textContent = `${minutes}:${secs}`;
     }
 
     window.onload = function () {
@@ -256,10 +275,12 @@
         return;
       }
 
+      clearInterval(timerInterval);
+
       const endTime = new Date();
       const timeTakenMin = ((endTime - startTime) / 60000).toFixed(2);
 
-      const token = "YOUR_GITHUB_TOKEN";
+      const token = "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";
       const repo = "Vvk1amzn2sd/DSA_practise_vvk";
       const branch = "main";
       const date = new Date().toISOString().slice(0, 10);
