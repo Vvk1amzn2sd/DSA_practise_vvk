@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -127,12 +124,9 @@
   </header>
 
   <div class="auth-section">
-    <label for="email">Email:</label>
-    <input type="email" id="email" placeholder="Enter email">
-    <label for="password">Password:</label>
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="loginUser()">Login</button>
-    <button onclick="signupUser()">Signup</button>
+    <label for="username">Username (6 characters max):</label>
+    <input type="text" id="username" maxlength="6" placeholder="Enter username">
+    <button onclick="startTimer()">Start</button>
   </div>
 
   <div class="calendar-controls">
@@ -179,51 +173,28 @@
   </footer>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
-      authDomain: "dsa-challenge.firebaseapp.com",
-      projectId: "dsa-challenge",
-      storageBucket: "dsa-challenge.appspot.com",
-      messagingSenderId: "866070092409",
-      appId: "1:866070092409:web:49faada850b1b91bbf52a8",
-      measurementId: "G-P3Y7XMJN2L"
-    };
-
-    const app = firebase.initializeApp(firebaseConfig);
-    const analytics = firebase.analytics();
+    let startTime = null;
 
     function toggleMode() {
       document.body.classList.toggle("dark-mode");
     }
 
-    function loginUser() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(() => {
-          alert("✅ Login successful");
-          document.getElementById("submitButton").disabled = false;
-        })
-        .catch((err) => alert("❌ Login failed: " + err.message));
+    function startTimer() {
+      const username = document.getElementById("username").value.trim();
+      if (username.length === 6) {
+        startTime = new Date();
+        document.getElementById("submitButton").disabled = false;
+        alert("✅ Timer started. You may now submit your solution.");
+      } else {
+        alert("❌ Username must be exactly 6 characters long.");
+      }
     }
 
-    function signupUser() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then(() => {
-          alert("✅ Signup successful");
-          document.getElementById("submitButton").disabled = false;
-        })
-        .catch((err) => alert("❌ Signup failed: " + err.message));
-    }
-
-    firebase.auth().onAuthStateChanged((user) => {
+    window.onload = function () {
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("datePicker").value = today;
       loadQuestionByDate();
-      document.getElementById("submitButton").disabled = !user;
-    });
+    };
 
     function loadQuestionByDate() {
       const selectedDate = document.getElementById("datePicker").value;
@@ -247,7 +218,55 @@
     }
 
     function submitSolution() {
-      alert("📝 Submission feature coming soon.");
+      const username = document.getElementById("username").value.trim().toLowerCase();
+      if (username.length !== 6 || !startTime) {
+        alert("❌ Please enter a valid 6-character username and click Start before submitting.");
+        return;
+      }
+
+      const endTime = new Date();
+      const timeTakenMin = ((endTime - startTime) / 60000).toFixed(2);
+
+      const token = "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";
+      const repo = "Vvk1amzn2sd/DSA_practise_vvk";
+      const branch = "main";
+      const date = new Date().toISOString().slice(0, 10);
+      const path = `solutions/${username}.txt`;
+      const solution = `Submitted by ${username} on ${date}\nTime taken: ${timeTakenMin} minutes`;
+      const content = btoa(solution);
+      const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+
+      fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: `Add solution from ${username}`,
+          content: content,
+          branch: branch
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.content) {
+            alert("✅ Solution submitted successfully.");
+            addToLeaderboard(username, `${timeTakenMin} min`);
+          } else {
+            alert("❌ Submission failed.");
+          }
+        })
+        .catch(err => alert("❌ Error: " + err.message));
+    }
+
+    function addToLeaderboard(name, time) {
+      const table = document.getElementById("leaderboard").querySelector("tbody");
+      const row = table.insertRow();
+      const nameCell = row.insertCell(0);
+      const timeCell = row.insertCell(1);
+      nameCell.textContent = name;
+      timeCell.textContent = time;
     }
   </script>
 </body>
