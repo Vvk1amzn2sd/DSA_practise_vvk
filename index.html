@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,17 +13,14 @@
       color: black;
       transition: background-color 0.3s, color 0.3s;
     }
-
     .dark-mode {
       background-color: #121212;
       color: #f1f1f1;
     }
-
     header, footer {
       text-align: center;
       margin-bottom: 30px;
     }
-
     nav ul {
       list-style: none;
       padding: 0;
@@ -30,13 +28,11 @@
       gap: 20px;
       justify-content: center;
     }
-
     nav a {
       text-decoration: none;
       color: inherit;
       font-weight: bold;
     }
-
     .toggle-btn {
       position: fixed;
       top: 10px;
@@ -44,8 +40,19 @@
       padding: 8px 12px;
       cursor: pointer;
     }
-
-    input, textarea, button {
+    .editor {
+      width: 100%;
+      height: 300px;
+      max-width: 800px;
+      margin: auto;
+      font-family: monospace;
+      white-space: pre;
+      overflow: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      user-select: none;
+    }
+    input, textarea, button, select {
       display: block;
       width: 100%;
       max-width: 500px;
@@ -53,142 +60,164 @@
       padding: 10px;
       font-size: 16px;
     }
-
     table {
       border-collapse: collapse;
       margin: 0 auto;
       width: 80%;
     }
-
     th, td {
       border: 1px solid #aaa;
       padding: 8px;
       text-align: center;
     }
-
-    section {
-      margin-bottom: 40px;
+    canvas {
+      margin: 20px auto;
+      display: block;
     }
   </style>
 </head>
 <body>
   <button class="toggle-btn" onclick="toggleMode()">Toggle Dark Mode</button>
-
   <header>
-    <h1>🛠️ DSA Challenge Hub for ATLAS</h1>
-    <p>Collaborative space for solving data structures & algorithms problems.</p>
+    <h1>🛠️ DSA Challenge Hub</h1>
+    <p>Practice DSA with your team and climb the leaderboard!</p>
   </header>
 
-  <nav>
-    <ul>
-      <li><a href="#">View Challenges</a></li>
-      <li><a href="#">View Solutions</a></li>
-    </ul>
-  </nav>
+  <section>
+    <label for="category">Select Category:</label>
+    <select id="category">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </section>
 
   <section>
     <h2>📅 Today's Challenge (<span id="todayDate"></span>)</h2>
-    <p id="daily-question"><strong>Question:</strong> Find the length of the longest increasing subsequence in an array.</p>
+    <pre id="questionDisplay">Loading...</pre>
+    <button onclick="loadQuestion()">🔄 Load Question</button>
   </section>
 
-  <section class="submit-section">
+  <section>
     <h2>🚀 Submit Your Solution</h2>
-    <form id="submissionForm">
-      <input type="text" id="name" placeholder="Your Name" required />
-      <input type="text" id="time" placeholder="Time Taken (e.g., 45 min)" required />
-      <textarea id="solution" rows="8" placeholder="Paste your solution here..." required></textarea>
-      <button type="submit">Submit</button>
-    </form>
-    <p id="confirmation" style="text-align:center;"></p>
+    <input type="text" id="name" placeholder="Your Name" required>
+    <div id="timer">Time: 0s</div>
+    <button onclick="startTimer()">Start</button>
+    <div class="editor" id="solutionEditor" contenteditable="true" oncopy="return false">// Write your code here (copy disabled)</div>
+    <button onclick="submitSolution()">Submit</button>
+    <p id="confirmation"></p>
   </section>
 
-  <section id="leaderboard-section">
+  <section>
     <h2>🏆 Leaderboard</h2>
-    <table id="leaderboard">
-      <thead>
-        <tr><th>Name</th><th>Time</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <canvas id="barChart"></canvas>
+    <div id="topScorers"></div>
   </section>
 
   <footer>
     <p>Made with ♥ by vvk</p>
   </footer>
 
-  <script>
-    function toggleMode() {
-      document.body.classList.toggle("dark-mode");
+<script>
+let timer = 0, interval;
+const token = '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';
+const repo = 'Vvk1amzn2sd/DSA_practise_vvk';
+const branch = 'main';
+
+function toggleMode() {
+  document.body.classList.toggle("dark-mode");
+}
+
+document.getElementById("todayDate").textContent = new Date().toLocaleDateString();
+
+document.getElementById("category").addEventListener("change", loadQuestion);
+
+function startTimer() {
+  timer = 0;
+  document.getElementById("timer").textContent = `Time: 0s`;
+  clearInterval(interval);
+  interval = setInterval(() => {
+    timer++;
+    document.getElementById("timer").textContent = `Time: ${timer}s`;
+  }, 1000);
+}
+
+async function loadQuestion() {
+  const cat = document.getElementById("category").value;
+  const api = `https://api.github.com/repos/${repo}/contents/Questions/${cat}`;
+  const res = await fetch(api);
+  const files = await res.json();
+  const latest = files.filter(f => f.name.endsWith(".txt")).sort().reverse()[0];
+  const txtRes = await fetch(latest.download_url);
+  const content = await txtRes.text();
+  document.getElementById("questionDisplay").textContent = content;
+}
+
+async function submitSolution() {
+  clearInterval(interval);
+  const name = document.getElementById("name").value.trim();
+  const code = document.getElementById("solutionEditor").textContent.trim();
+  if (!name || !code) return alert("Fill all fields");
+  const date = new Date().toISOString().slice(0, 10);
+  const safe = name.replace(/\s+/g, '_').toLowerCase();
+  const path = `solutions/${date}-${safe}.txt`;
+  const content = btoa(`Name: ${name}\nTime: ${timer}s\n\n${code}`);
+
+  const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `token ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `Add ${name}'s solution`,
+      content,
+      branch
+    })
+  });
+
+  if (res.ok) {
+    document.getElementById("confirmation").textContent = `✅ ${name}'s solution submitted in ${timer}s.`;
+    updateLeaderboard();
+  } else {
+    alert("❌ Submission failed");
+  }
+}
+
+async function updateLeaderboard() {
+  const res = await fetch(`https://api.github.com/repos/${repo}/contents/solutions`);
+  const files = await res.json();
+  const times = {};
+
+  for (const file of files) {
+    const txt = await fetch(file.download_url).then(r => r.text());
+    const name = (txt.match(/Name:\s*(.*)/) || [])[1]?.toLowerCase();
+    const time = parseInt((txt.match(/Time:\s*(\d+)/) || [])[1]);
+    if (name && (!times[name] || times[name] > time)) times[name] = time;
+  }
+
+  const sorted = Object.entries(times).sort((a, b) => a[1] - b[1]);
+  const ctx = document.getElementById("barChart").getContext("2d");
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([n]) => n),
+      datasets: [{
+        label: 'Time (s)',
+        data: sorted.map(([_, t]) => t),
+        backgroundColor: '#4285f4'
+      }]
     }
+  });
 
-    // Set today's date
-    document.getElementById("todayDate").textContent = new Date().toLocaleDateString();
+  document.getElementById("topScorers").innerHTML = `
+    🥇 Top Today: ${sorted[0]?.[0]}<br>
+    🥈 Weekly/Monthly stats coming soon...
+  `;
+}
 
-    // Handle form submission
-    document.getElementById("submissionForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const name = document.getElementById("name").value.trim();
-      const time = document.getElementById("time").value.trim();
-      const solution = document.getElementById("solution").value.trim();
-
-      if (name && time && solution) {
-        document.getElementById("confirmation").textContent =
-          `✅ ${name}'s solution submitted (Time: ${time})`;
-
-        addToLeaderboard(name, time);
-        pushToGitHub(name, time, solution);
-
-        // Clear form
-        document.getElementById("name").value = "";
-        document.getElementById("time").value = "";
-        document.getElementById("solution").value = "";
-      }
-    });
-
-    // Add to leaderboard table
-    function addToLeaderboard(name, time) {
-      const table = document.getElementById("leaderboard").querySelector("tbody");
-      const row = table.insertRow();
-      row.insertCell(0).textContent = name;
-      row.insertCell(1).textContent = time;
-    }
-
-    // Push solution to GitHub
-    async function pushToGitHub(name, time, solution) {
-      const token = "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"; // 🔁 please dont use it for malicious purpose
-      const repo = "Vvk1amzn2sd/DSA_practise_vvk";
-      const branch = "main";
-
-      const date = new Date().toISOString().slice(0, 10);
-      const safeName = name.replace(/\s+/g, "_").toLowerCase();
-      const path = `solutions/${date}-${safeName}.txt`;
-
-      const content = btoa(`Name: ${name}\nTime: ${time}\n\nSolution:\n${solution}`);
-
-      const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-
-      const res = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Authorization: `token ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: `Add solution from ${name}`,
-          content: content,
-          branch: branch
-        })
-      });
-
-      if (res.ok) {
-        alert("✅ Solution pushed to GitHub!");
-      } else {
-        const err = await res.json();
-        alert("❌ GitHub push failed: " + (err.message || "Unknown error"));
-        console.error(err);
-      }
-    }
-  </script>
+loadQuestion();
+updateLeaderboard();
+</script>
 </body>
 </html>
