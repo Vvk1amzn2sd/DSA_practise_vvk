@@ -40,6 +40,7 @@
 
     nav, .main-section {
       display: flex;
+      flex-direction: row;
       padding: 10px;
       height: calc(100vh - 160px);
     }
@@ -48,6 +49,8 @@
       width: 40%;
       padding: 20px;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
 
     .right-panel {
@@ -69,6 +72,7 @@
       flex: 1;
       width: 100%;
       border: none;
+      min-height: 100%;
     }
 
     table {
@@ -95,8 +99,13 @@
       margin: 15px;
     }
 
+    footer {
+      background-color: #f4f4f4;
+      padding: 10px;
+    }
+
     #leaderboard-section {
-      margin-top: 30px;
+      margin-top: auto;
     }
   </style>
 </head>
@@ -180,7 +189,6 @@
       const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
       const dateString = `${parseInt(day)}_${months[parseInt(month) - 1]}`;
 
-      // Count how many files exist before this date to guess DAY number dynamically (future improvement)
       const filename = `${dateString}_DAY1_${category}.txt`;
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
 
