@@ -1,0 +1,86 @@
+# DAY 1 Challenge – All the best! 💪
+
+🧠 Question: Delete Node in a Linked List  
+📘 Level: Medium  
+
+---
+
+📄 Description:
+
+There is a singly-linked list head and we want to delete a node node in it.
+
+You are given the node to be deleted node. You will not be given access to the first node of head.
+
+All the values of the linked list are unique, and it is guaranteed that the given node node is not the last node in the linked list.
+
+Delete the given node. Note that by deleting the node, we do not mean removing it from memory.
+It means:    The value of the given node should not exist in the linked list.
+              The number of nodes in the linked list should decrease by one.
+              All the values before node should be in the same order.
+              All the values after node should be in the same orde
+
+Your task is to delete the given node such that:
+- The node’s value no longer exists in the list  
+- The total number of nodes decreases by one  
+- The order of remaining nodes remains unchanged
+
+<b> Note: You are not actually removing the node from memory. You must modify the list so that the node is effectively gone. </b>
+
+---
+
+<strong> 🔐 Constraints: </strong>
+- All values in the linked list are unique
+- The node to be deleted is **not** the last node
+
+---
+
+📌 Sample input output
+
+📌 Example 1:
+
+**Input list:**  
+head → [1] → [2] → [3] → [4]  
+**Node to delete:** [3]
+
+**Output list:**  
+head → [1] → [2] → [4]
+
+---
+
+📌 Example 2:
+
+**Input list:**  
+head → [10] → [20] → [30] → [40]  
+**Node to delete:** [20]
+
+**Output list:**  
+head → [10] → [30] → [40]
+
+---
+
+📌 Example 3:
+
+**Input list:**  
+head → [5] → [15] → [25]  
+**Node to delete:** [15]
+
+**Output list:**  
+head → [5] → [25]
+
+---
+<strong><em></strong></em>
+📥 Function Signature:
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+# write code inside class Solution
+class Solution {
+    public void deleteNode(ListNode node) {
+        
+    }
+}
