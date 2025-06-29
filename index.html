@@ -92,7 +92,7 @@
     iframe {
       flex: 1;
       width: 100%;
-      height: 100%;
+      height: 500px;
       border: none;
     }
 
@@ -141,28 +141,10 @@
       word-wrap: break-word;
     }
 
-    .paiza-layout {
+    .ide-controls {
       display: flex;
-      flex-direction: row;
-      gap: 10px;
-      height: 100%;
-    }
-
-    .paiza-input {
-      width: 30%;
-      background: #f1f1f1;
-      padding: 10px;
-    }
-
-    .paiza-output {
-      width: 70%;
-      background: #f9f9f9;
-      padding: 10px;
-    }
-
-    .dark-mode .paiza-input,
-    .dark-mode .paiza-output {
-      background: #2a2a2a;
+      justify-content: space-between;
+      margin-top: 5px;
     }
   </style>
 </head>
@@ -177,7 +159,6 @@
   <div class="auth-section">
     <label for="username">Username (6 characters max):</label>
     <input type="text" id="username" maxlength="6" placeholder="Enter username">
-    <button onclick="startTimer()">Start</button>
   </div>
 
   <div class="calendar-controls">
@@ -189,7 +170,6 @@
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
-    <button onclick="submitSolution()" id="submitButton" disabled>📤 Submit</button>
   </div>
 
   <div class="main-section">
@@ -200,31 +180,24 @@
 <em>Loading today's challenge...</em>
         </pre>
       </section>
+      <section id="leaderboard-section">
+        <h2>🏆 Leaderboard</h2>
+        <table id="leaderboard">
+          <thead>
+            <tr><th>Name</th><th>Time</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
     </div>
 
     <div class="right-panel">
-      <div class="paiza-layout">
-        <div class="paiza-input">
-          <h3>Input</h3>
-          <p>Enter your input on Paiza IDE manually</p>
-        </div>
-        <div class="paiza-output">
-          <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
-        </div>
+      <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
+      <div class="ide-controls">
+        <button onclick="startTimer()">▶️ Start</button>
+        <button onclick="submitSolution()" id="submitButton" disabled>📤 Submit</button>
       </div>
     </div>
-  </div>
-
-  <div class="left-panel">
-    <section id="leaderboard-section">
-      <h2>🏆 Leaderboard</h2>
-      <table id="leaderboard">
-        <thead>
-          <tr><th>Name</th><th>Time</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
   </div>
 
   <footer>
