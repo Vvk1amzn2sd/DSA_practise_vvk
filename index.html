@@ -52,8 +52,9 @@
 
     .right-panel {
       width: 60%;
-      padding: 0;
       height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .toggle-btn {
@@ -65,8 +66,8 @@
     }
 
     iframe {
+      flex: 1;
       width: 100%;
-      height: calc(100% - 40px);
       border: none;
     }
 
@@ -147,7 +148,6 @@
     </div>
 
     <div class="right-panel">
-      <h2 style="text-align: center;">💻 Try It Yourself</h2>
       <iframe src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
     </div>
   </div>
@@ -177,9 +177,11 @@
       if (!selectedDate) return;
 
       const [year, month, day] = selectedDate.split("-");
-
       const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-      const filename = `${parseInt(day)}_${months[parseInt(month) - 1]}_DAY1_${category}.txt`;
+      const dateString = `${parseInt(day)}_${months[parseInt(month) - 1]}`;
+
+      // Count how many files exist before this date to guess DAY number dynamically (future improvement)
+      const filename = `${dateString}_DAY1_${category}.txt`;
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
 
       try {
