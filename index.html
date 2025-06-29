@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -67,6 +71,7 @@
     .top-buttons {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 5px;
     }
 
@@ -74,16 +79,34 @@
       background-color: #6c63ff;
       color: white;
       border: none;
-      padding: 5px 10px;
+      padding: 5px 15px;
+      font-weight: bold;
       cursor: pointer;
     }
 
     #timerDisplay {
-      position: absolute;
-      top: 0;
-      right: 10px;
       font-weight: bold;
       font-size: 16px;
+      color: #333;
+    }
+
+    .auth-section button {
+      background-color: #ff6f61;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      margin: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .calendar-controls {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 10px;
+      margin: 10px;
+      margin-left: 15px;
     }
   </style>
 </head>
@@ -94,7 +117,7 @@
 
   <div class="auth-section">
     <div>
-      <input type="text" id="username" placeholder="Username (6 letters)" maxlength="6">
+      <input type="email" id="email" placeholder="Email">
     </div>
     <div>
       <input type="password" id="password" placeholder="Password">
@@ -105,7 +128,8 @@
     </div>
   </div>
 
-  <div class="auth-section">
+  <div class="calendar-controls">
+    <label for="datePicker">📅</label>
     <input type="date" id="datePicker" onchange="loadQuestionByDate()">
     <select id="category" onchange="loadQuestionByDate()">
       <option value="easy">Easy</option>
@@ -122,8 +146,8 @@
     <div class="right-panel">
       <div class="top-buttons">
         <button onclick="startTimer()">Start</button>
-        <button onclick="submitSolution()">Submit</button>
         <span id="timerDisplay"></span>
+        <button onclick="submitSolution()">Submit</button>
       </div>
       <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight"></iframe>
     </div>
@@ -137,60 +161,83 @@
       </thead>
       <tbody></tbody>
     </table>
+    <h3>Weekly Top Performers</h3>
+    <ul id="weekly-leaderboard"></ul>
+    <h3>Monthly Top Performers</h3>
+    <ul id="monthly-leaderboard"></ul>
   </div>
 
   <script>
-    let startTime = null;
-    let timerInterval = null;
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
+      authDomain: "dsa-challenge.firebaseapp.com",
+      databaseURL: "https://dsa-challenge-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "dsa-challenge",
+      storageBucket: "dsa-challenge.firebasestorage.app",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "1:866070092409:web:49faada850b1b91bbf52a8",
+      measurementId: "G-P3Y7XMJN2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    firebase.analytics();
 
     function signupUser() {
-      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      if (username.length !== 6 || !password) {
-        alert("❌ Username must be 6 characters and password must not be empty.");
-        return;
-      }
-      localStorage.setItem("dsaUsername", username);
-      localStorage.setItem("dsaPassword", password);
-      alert("✅ Signup successful. You may now login.");
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => alert("✅ Signup successful!"))
+        .catch(err => alert("❌ " + err.message));
     }
 
     function loginUser() {
-      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      if (localStorage.getItem("dsaUsername") === username && localStorage.getItem("dsaPassword") === password) {
-        alert("✅ Login successful. You may now start coding.");
-      } else {
-        alert("❌ Invalid username or password.");
-      }
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => alert("✅ Login successful. You may now start coding."))
+        .catch(err => alert("❌ " + err.message));
     }
 
+    let startTime = null;
     function startTimer() {
-      const username = localStorage.getItem("dsaUsername");
-      if (!username) {
-        alert("❌ Please login first.");
-        return;
-      }
       startTime = new Date();
       const timerDisplay = document.getElementById("timerDisplay");
-      timerInterval = setInterval(() => {
+      setInterval(() => {
         const now = new Date();
-        const seconds = Math.floor((now - startTime) / 1000);
-        timerDisplay.textContent = `Time: ${seconds}s`;
+        const diff = Math.floor((now - startTime) / 1000);
+        timerDisplay.textContent = `${diff} sec`;
       }, 1000);
-      alert("✅ Timer started.");
     }
 
-    function addToLeaderboard(name, time) {
-      const table = document.getElementById("leaderboard").querySelector("tbody");
-      const row = table.insertRow();
-      row.insertCell(0).textContent = name;
-      row.insertCell(1).textContent = time;
+    function submitSolution() {
+      const user = firebase.auth().currentUser;
+      if (!user || !startTime) {
+        alert("❌ You must be logged in and start the timer.");
+        return;
+      }
+
+      const endTime = new Date();
+      const timeTaken = ((endTime - startTime) / 60000).toFixed(2);
+      const date = new Date().toISOString().split("T")[0];
+      const category = document.getElementById("category").value;
+      const email = user.email.replace(/[^a-zA-Z0-9]/g, "_");
+
+      const entry = {
+        email: user.email,
+        time: timeTaken + " min",
+        submittedAt: Date.now()
+      };
+
+      db.ref(`leaderboard/${date}/${category}/${email}`).set(entry)
+        .then(() => alert("✅ Submitted! Leaderboard will refresh."))
+        .catch(err => alert("❌ Submission failed: " + err.message));
     }
 
     function loadQuestionByDate() {
       const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value.toLowerCase();
+      const category = document.getElementById("category").value;
       const dateObj = new Date(selectedDate);
       const day = dateObj.getDate();
       const month = dateObj.toLocaleString('default', { month: 'long' }).toUpperCase();
@@ -198,116 +245,74 @@
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
 
       fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error("Question not found.");
-          return res.text();
-        })
-        .then(text => {
-          document.getElementById("daily-question").textContent = text;
-          loadLeaderboard();
-        })
-        .catch(err => {
-          document.getElementById("daily-question").textContent = "❌ " + err.message;
-        });
+        .then(res => res.ok ? res.text() : Promise.reject("Question not found."))
+        .then(text => document.getElementById("daily-question").textContent = text)
+        .catch(err => document.getElementById("daily-question").textContent = "❌ " + err);
+
+      loadLeaderboard();
     }
 
     function loadLeaderboard() {
+      const selectedDate = document.getElementById("datePicker").value;
+      const category = document.getElementById("category").value;
+      const date = new Date(selectedDate).toISOString().slice(0, 10);
       const table = document.getElementById("leaderboard").querySelector("tbody");
       table.innerHTML = '';
 
-      const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value.toLowerCase();
-      const date = new Date(selectedDate).toISOString().slice(0, 10);
-      const fileName = `${date}_${category}.txt`;
-      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Leaders/${fileName}`;
-
-      fetch(url)
-        .then(res => res.ok ? res.text() : "")
-        .then(text => {
-          if (!text.trim()) {
-            const row = table.insertRow();
-            const cell = row.insertCell(0);
-            cell.colSpan = 2;
-            cell.textContent = "No submissions yet.";
-            return;
-          }
-          const lines = text.trim().split("\n");
-          for (const line of lines) {
-            const [name, time] = line.split(',');
-            const row = table.insertRow();
-            row.insertCell(0).textContent = name;
-            row.insertCell(1).textContent = time;
-          }
-        });
-    }
-
-    async function submitSolution() {
-      const username = localStorage.getItem("dsaUsername");
-      if (!username || username.length !== 6 || !startTime) {
-        alert("❌ Please login and start the timer before submitting.");
-        return;
-      }
-
-      clearInterval(timerInterval);
-
-      const endTime = new Date();
-      const timeTakenMin = ((endTime - startTime) / 60000).toFixed(2);
-
-      const token = "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";
-      const repo = "Vvk1amzn2sd/DSA_practise_vvk";
-      const branch = "main";
-      const date = new Date().toISOString().slice(0, 10);
-      const category = document.getElementById("category").value;
-      const solutionPath = `solutions/${date}_${category}_${username}.txt`;
-      const leaderboardPath = `Leaders/${date}_${category}.txt`;
-      const solution = `Submitted by ${username} on ${date}\nTime taken: ${timeTakenMin} minutes`;
-      const leaderboardEntry = `${username},${timeTakenMin} min\n`;
-
-      async function pushFile(path, content) {
-        const contentEncoded = btoa(content);
-        const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-
-        const getResponse = await fetch(url, {
-          headers: { Authorization: `token ${token}` }
-        });
-
-        let sha = null;
-        if (getResponse.ok) {
-          const fileData = await getResponse.json();
-          sha = fileData.sha;
+      db.ref(`leaderboard/${date}/${category}`).on("value", snapshot => {
+        const data = snapshot.val();
+        if (!data) return;
+        const entries = Object.values(data).sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+        for (const entry of entries) {
+          const row = table.insertRow();
+          row.insertCell(0).textContent = entry.email;
+          row.insertCell(1).textContent = entry.time;
         }
+      });
 
-        const body = {
-          message: sha ? `Update ${path}` : `Add ${path}`,
-          content: contentEncoded,
-          branch: branch,
-          ...(sha && { sha })
-        };
+      loadAggregateLeaderboard("weekly");
+      loadAggregateLeaderboard("monthly");
+    }
 
-        return fetch(url, {
-          method: "PUT",
-          headers: {
-            Authorization: `token ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(body)
+    function loadAggregateLeaderboard(period) {
+      const listId = period === "weekly" ? "weekly-leaderboard" : "monthly-leaderboard";
+      const container = document.getElementById(listId);
+      container.innerHTML = '';
+
+      const now = new Date();
+      const msInDay = 86400000;
+      const days = period === "weekly" ? 7 : 30;
+      const emailsMap = {};
+
+      for (let i = 0; i < days; i++) {
+        const d = new Date(now - i * msInDay);
+        const dateStr = d.toISOString().split("T")[0];
+        db.ref(`leaderboard/${dateStr}`).once("value").then(snapshot => {
+          const dateData = snapshot.val();
+          if (!dateData) return;
+          for (const cat in dateData) {
+            for (const uid in dateData[cat]) {
+              const entry = dateData[cat][uid];
+              if (!emailsMap[entry.email]) emailsMap[entry.email] = [];
+              emailsMap[entry.email].push(parseFloat(entry.time));
+            }
+          }
+          const scores = Object.entries(emailsMap).map(([email, times]) => {
+            const total = times.reduce((a, b) => a + b, 0);
+            const avg = (total / times.length).toFixed(2);
+            return { email, avg };
+          }).sort((a, b) => parseFloat(a.avg) - parseFloat(b.avg));
+
+          container.innerHTML = scores.map(s => `<li>${s.email}: ${s.avg} min avg</li>`).join("");
         });
       }
-
-      try {
-        await pushFile(solutionPath, solution);
-
-        const existing = await fetch(`https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/${leaderboardPath}`)
-          .then(res => res.ok ? res.text() : "");
-
-        await pushFile(leaderboardPath, existing + leaderboardEntry);
-
-        alert("✅ Solution submitted successfully.");
-        addToLeaderboard(username, `${timeTakenMin} min`);
-      } catch (error) {
-        alert("❌ Submission failed: " + error.message);
-      }
     }
+
+    window.onload = () => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("datePicker").value = today;
+      loadQuestionByDate();
+    };
   </script>
 </body>
 </html>
