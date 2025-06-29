@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -42,7 +45,7 @@
       display: flex;
       flex-direction: row;
       padding: 10px;
-      height: calc(100vh - 160px);
+      height: calc(100vh - 200px);
     }
 
     .left-panel {
@@ -119,11 +122,12 @@
   </header>
 
   <div class="auth-section">
-    <label for="username">Username:</label>
-    <input type="text" id="username" placeholder="Enter your name">
+    <label for="email">Email:</label>
+    <input type="email" id="email" placeholder="Enter email">
     <label for="password">Password:</label>
     <input type="password" id="password" placeholder="Password">
     <button onclick="loginUser()">Login</button>
+    <button onclick="signupUser()">Signup</button>
   </div>
 
   <div class="calendar-controls">
@@ -170,72 +174,40 @@
   </footer>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
+      authDomain: "dsa-challenge.firebaseapp.com",
+      projectId: "dsa-challenge",
+      storageBucket: "dsa-challenge.appspot.com",
+      messagingSenderId: "866070092409",
+      appId: "1:866070092409:web:49faada850b1b91bbf52a8",
+      measurementId: "G-P3Y7XMJN2L"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics();
+
     function toggleMode() {
       document.body.classList.toggle("dark-mode");
     }
 
     function loginUser() {
-      const user = document.getElementById("username").value;
-      const pass = document.getElementById("password").value;
-      if (user.toLowerCase() === "team" && pass === "dsa123") {
-        alert("✅ Login successful");
-      } else {
-        alert("❌ Invalid credentials");
-      }
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => alert("✅ Login successful"))
+        .catch((err) => alert("❌ Login failed: " + err.message));
     }
 
-    async function loadQuestionByDate() {
-      const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value;
-      if (!selectedDate) return;
-
-      const dateObj = new Date(selectedDate);
-      const day = dateObj.getDate();
-      const filename = `Day${day}.txt`;
-      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Question not found");
-        const text = await response.text();
-        document.getElementById("daily-question").innerText = text;
-      } catch (error) {
-        document.getElementById("daily-question").innerHTML = `<span style="color:red;">⚠️ Unable to load question: ${error.message}</span>`;
-      }
+    function signupUser() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(() => alert("✅ Signup successful"))
+        .catch((err) => alert("❌ Signup failed: " + err.message));
     }
 
-    async function submitSolution() {
-      const name = document.getElementById("username").value.trim();
-      if (!name) return alert("Please enter your username before submitting.");
-
-      const solutionCode = "Code submitted via IDE (placeholder)."; // You can enhance this via paiza API in future
-
-      const today = new Date();
-      const day = today.getDate();
-      const filename = `solutions/${name.replace(/\s+/g, "_").toLowerCase()}_Day${day}.txt`;
-      const content = btoa(`User: ${name}\nDate: ${today.toDateString()}\n\n${solutionCode}`);
-
-      const res = await fetch(`https://api.github.com/repos/Vvk1amzn2sd/DSA_practise_vvk/contents/${filename}`, {
-        method: "PUT",
-        headers: {
-          Authorization: "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",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: `Submit solution from ${name}`,
-          content: content,
-          branch: "main"
-        })
-      });
-
-      if (res.ok) {
-        alert("✅ Solution submitted and pushed to GitHub.");
-      } else {
-        const err = await res.json();
-        alert("❌ Submission failed: " + (err.message || "Unknown error"));
-        console.error(err);
-      }
-    }
+    // Future: Implement test case validation and GitHub solution saving
   </script>
 </body>
 </html>
