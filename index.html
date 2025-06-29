@@ -35,7 +35,7 @@
 
     header {
       text-align: center;
-      padding: 8px;
+      padding: 5px;
       background-color: #f4f4f4;
     }
 
@@ -130,6 +130,25 @@
       white-space: pre-wrap;
       word-wrap: break-word;
     }
+
+    .paiza-layout {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      height: 100%;
+    }
+
+    .paiza-input {
+      width: 30%;
+      background: #f1f1f1;
+      padding: 10px;
+    }
+
+    .paiza-output {
+      width: 70%;
+      background: #f9f9f9;
+      padding: 10px;
+    }
   </style>
 </head>
 <body>
@@ -169,7 +188,15 @@
     </div>
 
     <div class="right-panel">
-      <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
+      <div class="paiza-layout">
+        <div class="paiza-input">
+          <h3>Input</h3>
+          <p>Enter your input on Paiza IDE manually</p>
+        </div>
+        <div class="paiza-output">
+          <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
+        </div>
+      </div>
     </div>
   </div>
 
