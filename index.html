@@ -75,7 +75,7 @@
   <button class="toggle-btn" onclick="toggleMode()">Toggle Dark Mode</button>
 
   <header>
-    <h1>🛠️ DSA Challenge Hub</h1>
+    <h1>🛠️ DSA Challenge Hub for ATLAS</h1>
     <p>Collaborative space for solving data structures & algorithms problems.</p>
   </header>
 
@@ -137,6 +137,7 @@
           `✅ ${name}'s solution submitted (Time: ${time})`;
 
         addToLeaderboard(name, time);
+        pushToGitHub(name, time, solution);
 
         // Clear form
         document.getElementById("name").value = "";
@@ -145,14 +146,48 @@
       }
     });
 
-    // Add submission to leaderboard
+    // Add to leaderboard table
     function addToLeaderboard(name, time) {
       const table = document.getElementById("leaderboard").querySelector("tbody");
       const row = table.insertRow();
-      const nameCell = row.insertCell(0);
-      const timeCell = row.insertCell(1);
-      nameCell.textContent = name;
-      timeCell.textContent = time;
+      row.insertCell(0).textContent = name;
+      row.insertCell(1).textContent = time;
+    }
+
+    // Push solution to GitHub
+    async function pushToGitHub(name, time, solution) {
+      const token = "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"; // 🔁 please dont use it for malicious purpose
+      const repo = "Vvk1amzn2sd/DSA_practise_vvk";
+      const branch = "main";
+
+      const date = new Date().toISOString().slice(0, 10);
+      const safeName = name.replace(/\s+/g, "_").toLowerCase();
+      const path = `solutions/${date}-${safeName}.txt`;
+
+      const content = btoa(`Name: ${name}\nTime: ${time}\n\nSolution:\n${solution}`);
+
+      const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: `Add solution from ${name}`,
+          content: content,
+          branch: branch
+        })
+      });
+
+      if (res.ok) {
+        alert("✅ Solution pushed to GitHub!");
+      } else {
+        const err = await res.json();
+        alert("❌ GitHub push failed: " + (err.message || "Unknown error"));
+        console.error(err);
+      }
     }
   </script>
 </body>
