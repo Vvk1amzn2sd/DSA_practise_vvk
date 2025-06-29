@@ -139,7 +139,7 @@
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
-    <button onclick="submitSolution()">📤 Submit</button>
+    <button onclick="submitSolution()" id="submitButton" disabled>📤 Submit</button>
   </div>
 
   <div class="main-section">
@@ -195,7 +195,10 @@
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(() => alert("✅ Login successful"))
+        .then(() => {
+          alert("✅ Login successful");
+          document.getElementById("submitButton").disabled = false;
+        })
         .catch((err) => alert("❌ Login failed: " + err.message));
     }
 
@@ -203,11 +206,44 @@
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then(() => alert("✅ Signup successful"))
+        .then(() => {
+          alert("✅ Signup successful");
+          document.getElementById("submitButton").disabled = false;
+        })
         .catch((err) => alert("❌ Signup failed: " + err.message));
     }
 
-    // Future: Implement test case validation and GitHub solution saving
+    firebase.auth().onAuthStateChanged((user) => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("datePicker").value = today;
+      loadQuestionByDate();
+      document.getElementById("submitButton").disabled = !user;
+    });
+
+    function loadQuestionByDate() {
+      const selectedDate = document.getElementById("datePicker").value;
+      const category = document.getElementById("category").value.toLowerCase();
+      const dateObj = new Date(selectedDate);
+      const day = dateObj.getDate();
+      const filename = `Day${day}.txt`;
+      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error("Question not found.");
+          return res.text();
+        })
+        .then(text => {
+          document.getElementById("daily-question").textContent = text;
+        })
+        .catch(err => {
+          document.getElementById("daily-question").textContent = `❌ ${err.message}`;
+        });
+    }
+
+    function submitSolution() {
+      alert("📝 Submission feature coming soon.");
+    }
   </script>
 </body>
 </html>
