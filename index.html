@@ -19,6 +19,13 @@
       color: #f1f1f1;
     }
 
+    .dark-mode input,
+    .dark-mode textarea,
+    .dark-mode select {
+      background-color: #2a2a2a;
+      color: #f1f1f1;
+    }
+
     header, footer {
       text-align: center;
       padding: 15px;
@@ -28,11 +35,13 @@
     nav, .main-section {
       display: flex;
       padding: 10px;
+      height: calc(100vh - 160px);
     }
 
     .left-panel {
       width: 45%;
       padding: 20px;
+      overflow-y: auto;
     }
 
     .right-panel {
@@ -50,7 +59,7 @@
 
     iframe {
       width: 100%;
-      height: 500px;
+      height: calc(100% - 40px);
       border: none;
     }
 
@@ -66,9 +75,11 @@
       text-align: center;
     }
 
-    .calendar {
-      text-align: center;
-      padding: 10px;
+    .calendar-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px;
     }
 
     .auth-section {
@@ -93,22 +104,23 @@
     <button onclick="loginUser()">Login</button>
   </div>
 
-  <div class="calendar">
+  <div class="calendar-controls">
     <label for="datePicker">📅 Choose a Date:</label>
     <input type="date" id="datePicker" onchange="loadQuestionByDate()">
+    <label for="category">Category:</label>
+    <select id="category" onchange="loadQuestionByDate()">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
   </div>
 
   <div class="main-section">
     <div class="left-panel">
       <section>
-        <h2>📌 Today's Challenge</h2>
+        <h2>📌 Challenge</h2>
         <p id="daily-question">
-          <strong>Question:</strong><br>
-          Delete Node in a Linked List<br>
-          <br>
-          <strong>Example:</strong><br>
-          Input: [4] -> [5] -> [1] -> [9], node = 5<br>
-          Output: [4] -> [1] -> [9]
+          <em>Loading today's challenge...</em>
         </p>
       </section>
 
@@ -143,16 +155,28 @@
       const pass = document.getElementById("password").value;
       if (user.toLowerCase() === "team" && pass === "dsa123") {
         alert("✅ Login successful");
-        // Store login in sessionStorage or unlock restricted features
       } else {
         alert("❌ Invalid credentials");
       }
     }
 
-    function loadQuestionByDate() {
+    async function loadQuestionByDate() {
       const selectedDate = document.getElementById("datePicker").value;
-      alert("🔍 Load question for: " + selectedDate);
-      // In future: fetch question dynamically based on date from repo or cache
+      const category = document.getElementById("category").value;
+      if (!selectedDate) return;
+
+      const [year, month, day] = selectedDate.split("-");
+      const filename = `${parseInt(day)}_${month.toUpperCase()}_DAY1_${category}.txt`;
+      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/questions/${category}/${filename}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Question not found");
+        const text = await response.text();
+        document.getElementById("daily-question").innerText = text;
+      } catch (error) {
+        document.getElementById("daily-question").innerHTML = `<span style="color:red;">⚠️ Unable to load question: ${error.message}</span>`;
+      }
     }
   </script>
 </body>
