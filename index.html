@@ -71,8 +71,8 @@
     iframe {
       flex: 1;
       width: 100%;
+      height: calc(100vh - 200px);
       border: none;
-      min-height: 100%;
     }
 
     table {
@@ -105,7 +105,7 @@
     }
 
     #leaderboard-section {
-      margin-top: auto;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -144,21 +144,23 @@
           <em>Loading today's challenge...</em>
         </p>
       </section>
-
-      <section id="leaderboard-section">
-        <h2>🏆 Leaderboard</h2>
-        <table id="leaderboard">
-          <thead>
-            <tr><th>Name</th><th>Time</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
     </div>
 
     <div class="right-panel">
       <iframe src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
     </div>
+  </div>
+
+  <div class="left-panel">
+    <section id="leaderboard-section">
+      <h2>🏆 Leaderboard</h2>
+      <table id="leaderboard">
+        <thead>
+          <tr><th>Name</th><th>Time</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
   </div>
 
   <footer>
@@ -185,11 +187,10 @@
       const category = document.getElementById("category").value;
       if (!selectedDate) return;
 
-      const [year, month, day] = selectedDate.split("-");
-      const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-      const dateString = `${parseInt(day)}_${months[parseInt(month) - 1]}`;
-
-      const filename = `${dateString}_DAY1_${category}.txt`;
+      const dateObj = new Date(selectedDate);
+      const day = dateObj.getDate();
+      const month = dateObj.toLocaleString('default', { month: 'long' });
+      const filename = `${day}_${month}_Day1_${category}.txt`;
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
 
       try {
