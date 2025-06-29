@@ -4,10 +4,203 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      onValue,
+      get,
+      child,
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
+      authDomain: "dsa-challenge.firebaseapp.com",
+      databaseURL:
+        "https://dsa-challenge-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "dsa-challenge",
+      storageBucket: "dsa-challenge.firebasestorage.app",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "1:866070092409:web:49faada850b1b91bbf52a8",
+      measurementId: "G-P3Y7XMJN2",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    window.signupUser = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => alert("✅ Signup successful!"))
+        .catch((err) => alert("❌ " + err.message));
+    };
+
+    window.loginUser = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => alert("✅ Login successful. You may now start coding."))
+        .catch((err) => alert("❌ " + err.message));
+    };
+
+    let timerInterval = null;
+    let startTime = null;
+
+    window.startTimer = function () {
+      if (!auth.currentUser) {
+        alert("❌ Please login before starting the timer.");
+        return;
+      }
+      if (timerInterval) clearInterval(timerInterval);
+      startTime = new Date();
+      const timerDisplay = document.getElementById("timerDisplay");
+      timerDisplay.textContent = "0 sec";
+
+      timerInterval = setInterval(() => {
+        const now = new Date();
+        const diff = Math.floor((now - startTime) / 1000);
+        timerDisplay.textContent = `${diff} sec`;
+      }, 1000);
+    };
+
+    window.submitSolution = function () {
+      if (!auth.currentUser) {
+        alert("❌ You must be logged in.");
+        return;
+      }
+      if (!startTime) {
+        alert("❌ Please start the timer before submitting.");
+        return;
+      }
+      clearInterval(timerInterval);
+
+      const endTime = new Date();
+      const timeTaken = ((endTime - startTime) / 60000).toFixed(2);
+      const date = new Date().toISOString().split("T")[0];
+      const category = document.getElementById("category").value;
+      const emailKey = auth.currentUser.email.replace(/[^a-zA-Z0-9]/g, "_");
+
+      const entry = {
+        email: auth.currentUser.email,
+        time: timeTaken,
+        submittedAt: Date.now(),
+      };
+
+      set(ref(db, `leaderboard/${date}/${category}/${emailKey}`), entry)
+        .then(() => {
+          alert("✅ Submitted! Leaderboard will refresh.");
+          loadLeaderboard();
+        })
+        .catch((err) => alert("❌ Submission failed: " + err.message));
+    };
+
+    window.loadQuestionByDate = function () {
+      const selectedDate = document.getElementById("datePicker").value;
+      const category = document.getElementById("category").value;
+      if (!selectedDate) return;
+      const dateObj = new Date(selectedDate);
+      const day = dateObj.getDate();
+      const month = dateObj.toLocaleString("default", { month: "long" }).toUpperCase();
+      const filename = `Day${day}_${month}.txt`;
+      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
+
+      fetch(url)
+        .then((res) => (res.ok ? res.text() : Promise.reject("Question not found.")))
+        .then((text) => (document.getElementById("daily-question").textContent = text))
+        .catch((err) => (document.getElementById("daily-question").textContent = "❌ " + err));
+
+      loadLeaderboard();
+    };
+
+    function loadLeaderboard() {
+      const selectedDate = document.getElementById("datePicker").value;
+      const category = document.getElementById("category").value;
+      const date = new Date(selectedDate).toISOString().slice(0, 10);
+      const tableBody = document.getElementById("leaderboard").querySelector("tbody");
+      tableBody.innerHTML = "";
+
+      const leaderboardRef = ref(db, `leaderboard/${date}/${category}`);
+      onValue(leaderboardRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          tableBody.innerHTML = "<tr><td colspan='2'>No submissions yet</td></tr>";
+          return;
+        }
+        const entries = Object.values(data).sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+        tableBody.innerHTML = "";
+        for (const entry of entries) {
+          const row = tableBody.insertRow();
+          row.insertCell(0).textContent = entry.email;
+          row.insertCell(1).textContent = entry.time + " min";
+        }
+      });
+
+      loadAggregateLeaderboard("weekly");
+      loadAggregateLeaderboard("monthly");
+    }
+
+    function loadAggregateLeaderboard(period) {
+      const listId = period === "weekly" ? "weekly-leaderboard" : "monthly-leaderboard";
+      const container = document.getElementById(listId);
+      container.innerHTML = "";
+
+      const now = new Date();
+      const msInDay = 86400000;
+      const days = period === "weekly" ? 7 : 30;
+      const emailTimesMap = {};
+
+      const promises = [];
+      for (let i = 0; i < days; i++) {
+        const d = new Date(now.getTime() - i * msInDay);
+        const dateStr = d.toISOString().split("T")[0];
+        promises.push(
+          get(child(ref(db), `leaderboard/${dateStr}`)).then((snapshot) => {
+            const dateData = snapshot.val();
+            if (!dateData) return;
+            for (const cat in dateData) {
+              for (const uid in dateData[cat]) {
+                const entry = dateData[cat][uid];
+                if (!emailTimesMap[entry.email]) emailTimesMap[entry.email] = [];
+                emailTimesMap[entry.email].push(parseFloat(entry.time));
+              }
+            }
+          })
+        );
+      }
+
+      Promise.all(promises).then(() => {
+        const scores = Object.entries(emailTimesMap)
+          .map(([email, times]) => {
+            const total = times.reduce((a, b) => a + b, 0);
+            const avg = (total / times.length).toFixed(2);
+            return { email, avg };
+          })
+          .sort((a, b) => parseFloat(a.avg) - parseFloat(b.avg));
+
+        container.innerHTML =
+          scores.length === 0
+            ? "<li>No submissions yet</li>"
+            : scores.map((s) => `<li>${s.email}: ${s.avg} min avg</li>`).join("");
+      });
+    }
+
+    window.onload = () => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("datePicker").value = today;
+      loadQuestionByDate();
+    };
+  </script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -53,7 +246,8 @@
       width: 100%;
       border-collapse: collapse;
     }
-    th, td {
+    th,
+    td {
       border: 1px solid #ccc;
       padding: 8px;
       text-align: center;
@@ -63,6 +257,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 5px;
+      gap: 15px;
     }
     .top-buttons button {
       background-color: #6c63ff;
@@ -97,277 +292,5 @@
       margin-left: 15px;
     }
   </style>
-</head>
-<body>
-  <header>
-    <h1>DSA Challenge Hub</h1>
-  </header>
-
-  <div class="auth-section">
-    <div>
-      <input type="email" id="email" placeholder="Email" />
-    </div>
-    <div>
-      <input type="password" id="password" placeholder="Password" />
-    </div>
-    <div>
-      <button onclick="signupUser()">Signup</button>
-      <button onclick="loginUser()">Login</button>
-    </div>
-  </div>
-
-  <div class="calendar-controls">
-    <label for="datePicker">📅</label>
-    <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
-    <select id="category" onchange="loadQuestionByDate()">
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-  </div>
-
-  <div class="main-section">
-    <div class="left-panel">
-      <h2>Challenge</h2>
-      <pre id="daily-question">Loading...</pre>
-    </div>
-    <div class="right-panel">
-      <div class="top-buttons" style="gap: 15px;">
-        <button onclick="startTimer()">Start</button>
-        <span id="timerDisplay">0 sec</span>
-        <button onclick="submitSolution()">Submit</button>
-      </div>
-      <iframe
-        id="code-ide"
-        src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight"
-      ></iframe>
-    </div>
-  </div>
-
-  <div id="leaderboard-section">
-    <h2>Daily Leaderboard</h2>
-    <table id="leaderboard">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <h3>Weekly Top Performers</h3>
-    <ul id="weekly-leaderboard"></ul>
-
-    <h3>Monthly Top Performers</h3>
-    <ul id="monthly-leaderboard"></ul>
-  </div>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
-      authDomain: "dsa-challenge.firebaseapp.com",
-      databaseURL:
-        "https://dsa-challenge-default-rtdb.asia-southeast1.firebasedatabase.app/",
-      projectId: "dsa-challenge",
-      storageBucket: "dsa-challenge.firebasestorage.app",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "1:866070092409:web:49faada850b1b91bbf52a8",
-      measurementId: "G-P3Y7XMJN2",
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-    firebase.analytics();
-
-    // Signup function
-    function signupUser() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth
-        .createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          alert("✅ Signup successful!");
-          console.log("Signup success:", userCredential);
-        })
-        .catch((err) => {
-          console.error("Signup error:", err);
-          alert("❌ " + err.message);
-        });
-    }
-
-    // Login function
-    function loginUser() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth
-        .signInWithEmailAndPassword(email, password)
-        .then(() => alert("✅ Login successful. You may now start coding."))
-        .catch((err) => alert("❌ " + err.message));
-    }
-
-    let timerInterval = null;
-    let startTime = null;
-
-    function startTimer() {
-      const user = firebase.auth().currentUser;
-      if (!user) {
-        alert("❌ Please login before starting the timer.");
-        return;
-      }
-      if (timerInterval) clearInterval(timerInterval);
-      startTime = new Date();
-      const timerDisplay = document.getElementById("timerDisplay");
-      timerDisplay.textContent = "0 sec";
-
-      timerInterval = setInterval(() => {
-        const now = new Date();
-        const diff = Math.floor((now - startTime) / 1000);
-        timerDisplay.textContent = `${diff} sec`;
-      }, 1000);
-    }
-
-    function submitSolution() {
-      const user = firebase.auth().currentUser;
-      if (!user) {
-        alert("❌ You must be logged in.");
-        return;
-      }
-      if (!startTime) {
-        alert("❌ Please start the timer before submitting.");
-        return;
-      }
-      clearInterval(timerInterval);
-
-      const endTime = new Date();
-      const timeTaken = ((endTime - startTime) / 60000).toFixed(2);
-      const date = new Date().toISOString().split("T")[0];
-      const category = document.getElementById("category").value;
-      const emailKey = user.email.replace(/[^a-zA-Z0-9]/g, "_");
-
-      const entry = {
-        email: user.email,
-        time: timeTaken,
-        submittedAt: Date.now(),
-      };
-
-      // Store under date/category/email
-      db.ref(`leaderboard/${date}/${category}/${emailKey}`)
-        .set(entry)
-        .then(() => {
-          alert("✅ Submitted! Leaderboard will refresh.");
-          loadLeaderboard();
-        })
-        .catch((err) => alert("❌ Submission failed: " + err.message));
-    }
-
-    function loadQuestionByDate() {
-      const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value;
-      if (!selectedDate) return;
-      const dateObj = new Date(selectedDate);
-      const day = dateObj.getDate();
-      const month = dateObj
-        .toLocaleString("default", { month: "long" })
-        .toUpperCase();
-      const filename = `Day${day}_${month}.txt`;
-      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
-
-      fetch(url)
-        .then((res) =>
-          res.ok ? res.text() : Promise.reject("Question not found.")
-        )
-        .then((text) => (document.getElementById("daily-question").textContent = text))
-        .catch((err) => (document.getElementById("daily-question").textContent = "❌ " + err));
-
-      loadLeaderboard();
-    }
-
-    // Load leaderboard daily + weekly + monthly
-    function loadLeaderboard() {
-      const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value;
-      const date = new Date(selectedDate).toISOString().slice(0, 10);
-      const tableBody = document.getElementById("leaderboard").querySelector("tbody");
-      tableBody.innerHTML = "";
-
-      // Daily leaderboard by category
-      db.ref(`leaderboard/${date}/${category}`).on("value", (snapshot) => {
-        const data = snapshot.val();
-        if (!data) {
-          tableBody.innerHTML = "<tr><td colspan='2'>No submissions yet</td></tr>";
-          return;
-        }
-        const entries = Object.values(data).sort(
-          (a, b) => parseFloat(a.time) - parseFloat(b.time)
-        );
-        tableBody.innerHTML = "";
-        for (const entry of entries) {
-          const row = tableBody.insertRow();
-          row.insertCell(0).textContent = entry.email;
-          row.insertCell(1).textContent = entry.time + " min";
-        }
-      });
-
-      loadAggregateLeaderboard("weekly");
-      loadAggregateLeaderboard("monthly");
-    }
-
-    // Aggregate weekly or monthly leaderboard with average across categories
-    function loadAggregateLeaderboard(period) {
-      const listId = period === "weekly" ? "weekly-leaderboard" : "monthly-leaderboard";
-      const container = document.getElementById(listId);
-      container.innerHTML = "";
-
-      const now = new Date();
-      const msInDay = 86400000;
-      const days = period === "weekly" ? 7 : 30;
-      const emailTimesMap = {};
-
-      let promises = [];
-      for (let i = 0; i < days; i++) {
-        const d = new Date(now.getTime() - i * msInDay);
-        const dateStr = d.toISOString().split("T")[0];
-        promises.push(
-          db
-            .ref(`leaderboard/${dateStr}`)
-            .once("value")
-            .then((snapshot) => {
-              const dateData = snapshot.val();
-              if (!dateData) return;
-              for (const cat in dateData) {
-                for (const uid in dateData[cat]) {
-                  const entry = dateData[cat][uid];
-                  if (!emailTimesMap[entry.email]) emailTimesMap[entry.email] = [];
-                  emailTimesMap[entry.email].push(parseFloat(entry.time));
-                }
-              }
-            })
-        );
-      }
-
-      Promise.all(promises).then(() => {
-        const scores = Object.entries(emailTimesMap)
-          .map(([email, times]) => {
-            const total = times.reduce((a, b) => a + b, 0);
-            const avg = (total / times.length).toFixed(2);
-            return { email, avg };
-          })
-          .sort((a, b) => parseFloat(a.avg) - parseFloat(b.avg));
-
-        container.innerHTML =
-          scores.length === 0
-            ? "<li>No submissions yet</li>"
-            : scores.map((s) => `<li>${s.email}: ${s.avg} min avg</li>`).join("");
-      });
-    }
-
-    window.onload = () => {
-      const today = new Date().toISOString().split("T")[0];
-      document.getElementById("datePicker").value = today;
-      loadQuestionByDate();
-    };
-  </script>
 </body>
 </html>
