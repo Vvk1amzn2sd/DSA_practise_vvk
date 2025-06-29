@@ -4,8 +4,70 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: white;
+      color: black;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .dark-mode {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+
+    header, footer {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: inherit;
+      font-weight: bold;
+    }
+
+    .toggle-btn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .submit-section {
+      margin-top: 40px;
+    }
+
+    input, textarea {
+      display: block;
+      width: 100%;
+      max-width: 500px;
+      margin: 10px auto;
+      padding: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px auto;
+      display: block;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <button class="toggle-btn" onclick="toggleMode()">Toggle Dark Mode</button>
+
   <header>
     <h1>🛠️ DSA Challenge Hub</h1>
     <p>Collaborative space for solving data structures & algorithms problems.</p>
@@ -26,8 +88,38 @@
     </p>
   </section>
 
+  <section class="submit-section">
+    <h2>Submit Your Solution</h2>
+    <form id="submissionForm">
+      <input type="text" id="name" placeholder="Your Name" required />
+      <input type="text" id="time" placeholder="Time Taken (e.g., 45 min)" required />
+      <textarea id="solution" rows="10" placeholder="Paste your solution here..." required></textarea>
+      <button type="submit">Submit Solution</button>
+    </form>
+    <p id="confirmation" style="text-align:center;"></p>
+  </section>
+
   <footer>
-    <p>Made with 💡 by our DSA team</p>
+    <p>Made with ♥ by vvk</p>
   </footer>
+
+  <script>
+    function toggleMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    document.getElementById("submissionForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const time = document.getElementById("time").value.trim();
+      const solution = document.getElementById("solution").value.trim();
+
+      if (name && time && solution) {
+        document.getElementById("confirmation").textContent =
+          `✅ Solution submitted by ${name} (Time: ${time})`;
+        // Optionally save this to a backend in future (e.g., PHP or Google Sheets API)
+      }
+    });
+  </script>
 </body>
 </html>
