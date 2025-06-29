@@ -30,7 +30,8 @@
     .dark-mode p,
     .dark-mode th,
     .dark-mode td,
-    .dark-mode pre {
+    .dark-mode pre,
+    .dark-mode button {
       background-color: #2a2a2a !important;
       color: #f1f1f1 !important;
     }
@@ -152,6 +153,15 @@
       font-weight: bold;
       font-size: 1rem;
     }
+
+    .button-purple {
+      background-color: purple;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -165,13 +175,14 @@
   <div class="auth-section">
     <label for="username">Username (6 characters max):</label>
     <input type="text" id="username" maxlength="6" placeholder="Enter username">
+    <button onclick="alert('✅ You may now start coding. There are no predefined classes. Check test cases in the question manually.')">Login</button>
   </div>
 
   <div class="calendar-controls">
     <label for="datePicker">📅 Choose a Date:</label>
-    <input type="date" id="datePicker" onchange="loadQuestionByDate()">
+    <input type="date" id="datePicker" onchange="loadQuestionByDate(); loadLeaderboard();">
     <label for="category">Category:</label>
-    <select id="category" onchange="loadQuestionByDate()">
+    <select id="category" onchange="loadQuestionByDate(); loadLeaderboard();">
       <option value="easy">Easy</option>
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
@@ -199,9 +210,9 @@
 
     <div class="right-panel">
       <div class="ide-controls">
-        <button onclick="startTimer()">▶️ Start</button>
+        <button class="button-purple" onclick="startTimer()">▶️ Start</button>
         <span id="timerDisplay">00:00</span>
-        <button onclick="submitSolution()" id="submitButton" disabled>📤 Submit</button>
+        <button class="button-purple" onclick="submitSolution()" id="submitButton" disabled>📤 Submit</button>
       </div>
       <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
     </div>
@@ -226,7 +237,7 @@
         document.getElementById("submitButton").disabled = false;
         updateTimer();
         timerInterval = setInterval(updateTimer, 1000);
-        alert("✅ Timer started. You may now submit your solution.");
+        alert("✅ Timer started. Please begin coding and press Submit when done.");
       } else {
         alert("❌ Username must be exactly 6 characters long.");
       }
@@ -245,6 +256,7 @@
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("datePicker").value = today;
       loadQuestionByDate();
+      loadLeaderboard();
     };
 
     function loadQuestionByDate() {
@@ -252,7 +264,8 @@
       const category = document.getElementById("category").value.toLowerCase();
       const dateObj = new Date(selectedDate);
       const day = dateObj.getDate();
-      const filename = `Day${day}.txt`;
+      const month = dateObj.toLocaleString('en-US', { month: 'long' }).toUpperCase();
+      const filename = `Day${day}_${month}.txt`;
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
 
       fetch(url)
@@ -268,6 +281,12 @@
         });
     }
 
+    function loadLeaderboard() {
+      const table = document.getElementById("leaderboard").querySelector("tbody");
+      table.innerHTML = '';
+      // Future: Fetch leaderboard based on date + category
+    }
+
     function submitSolution() {
       const username = document.getElementById("username").value.trim().toLowerCase();
       if (username.length !== 6 || !startTime) {
@@ -280,11 +299,12 @@
       const endTime = new Date();
       const timeTakenMin = ((endTime - startTime) / 60000).toFixed(2);
 
-      const token = "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";
+      const token = "YOUR_GITHUB_TOKEN";
       const repo = "Vvk1amzn2sd/DSA_practise_vvk";
       const branch = "main";
       const date = new Date().toISOString().slice(0, 10);
-      const path = `solutions/${username}.txt`;
+      const category = document.getElementById("category").value;
+      const path = `solutions/${date}_${category}_${username}.txt`;
       const solution = `Submitted by ${username} on ${date}\nTime taken: ${timeTakenMin} minutes`;
       const content = btoa(solution);
       const url = `https://api.github.com/repos/${repo}/contents/${path}`;
