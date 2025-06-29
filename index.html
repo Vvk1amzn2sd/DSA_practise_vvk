@@ -4,188 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: white;
-      color: black;
-    }
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    header {
-      background-color: #f4f4f4;
-      padding: 10px;
-      text-align: center;
-    }
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
+      authDomain: "dsa-challenge.firebaseapp.com",
+      databaseURL: "https://dsa-challenge-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "dsa-challenge",
+      storageBucket: "dsa-challenge.appspot.com",
+      messagingSenderId: "866070092409",
+      appId: "1:866070092409:web:49faada850b1b91bbf52a8",
+      measurementId: "G-P3Y7XMJN2L"
+    };
 
-    .auth-section {
-      text-align: center;
-      margin: 10px;
-    }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    .main-section {
-      display: flex;
-      flex-direction: row;
-      height: 70vh;
-    }
+    window.signupUser = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => alert("✅ Signup successful!"))
+        .catch((err) => alert("❌ " + err.message));
+    };
 
-    .left-panel {
-      width: 50%;
-      padding: 10px;
-      overflow-y: auto;
-    }
-
-    .right-panel {
-      width: 50%;
-      padding: 10px;
-      position: relative;
-    }
-
-    iframe {
-      width: 100%;
-      height: calc(100% - 30px);
-      border: none;
-    }
-
-    #leaderboard-section {
-      margin-top: 20px;
-      padding: 10px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .top-buttons {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-
-    .top-buttons button {
-      background-color: #6c63ff;
-      color: white;
-      border: none;
-      padding: 5px 15px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #timerDisplay {
-      font-weight: bold;
-      font-size: 16px;
-      color: #333;
-    }
-
-    .auth-section button {
-      background-color: #ff6f61;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      margin: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .calendar-controls {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 10px;
-      margin: 10px;
-      margin-left: 15px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>DSA Challenge Hub</h1>
-  </header>
-
-  <div class="auth-section">
-    <div>
-      <input type="email" id="email" placeholder="Email">
-    </div>
-    <div>
-      <input type="password" id="password" placeholder="Password">
-    </div>
-    <div>
-      <button onclick="signupUser()">Signup</button>
-      <button onclick="loginUser()">Login</button>
-    </div>
-  </div>
-
-  <div class="calendar-controls">
-    <label for="datePicker">📅</label>
-    <input type="date" id="datePicker" onchange="loadQuestionByDate()">
-    <select id="category" onchange="loadQuestionByDate()">
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-  </div>
-
-  <div class="main-section">
-    <div class="left-panel">
-      <h2>Challenge</h2>
-      <pre id="daily-question">Loading...</pre>
-    </div>
-    <div class="right-panel">
-      <div class="top-buttons">
-        <button onclick="startTimer()">Start</button>
-        <span id="timerDisplay"></span>
-        <button onclick="submitSolution()">Submit</button>
-      </div>
-      <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight"></iframe>
-    </div>
-  </div>
-
-  <div id="leaderboard-section">
-    <h2>Leaderboard</h2>
-    <table id="leaderboard">
-      <thead>
-        <tr><th>Name</th><th>Time</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <h3>Weekly Top Performers</h3>
-    <ul id="weekly-leaderboard"></ul>
-    <h3>Monthly Top Performers</h3>
-    <ul id="monthly-leaderboard"></ul>
-  </div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const today = new Date().toISOString().split("T")[0];
-      document.getElementById("datePicker").value = today;
-      loadQuestionByDate();
-    });
-
-    function signupUser() {
-      alert("Signup clicked. Functionality under development or available in Firebase version.");
-    }
-
-    function loginUser() {
-      alert("Login clicked. Functionality under development or available in Firebase version.");
-    }
+    window.loginUser = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => alert("✅ Login successful!"))
+        .catch((err) => alert("❌ " + err.message));
+    };
 
     let timerInterval = null;
     let startTime = null;
 
-    function startTimer() {
+    window.startTimer = function () {
+      if (!auth.currentUser) {
+        alert("❌ Please login before starting the timer.");
+        return;
+      }
       startTime = new Date();
       const timerDisplay = document.getElementById("timerDisplay");
       timerInterval = setInterval(() => {
@@ -193,20 +64,58 @@
         const diff = Math.floor((now - startTime) / 1000);
         timerDisplay.textContent = `${diff} sec`;
       }, 1000);
-    }
+    };
 
-    function submitSolution() {
+    window.submitSolution = function () {
+      if (!auth.currentUser) {
+        alert("❌ You must be logged in.");
+        return;
+      }
       if (!startTime) {
-        alert("Start the timer first.");
+        alert("❌ Start the timer first.");
         return;
       }
       clearInterval(timerInterval);
+
+      const solutionCode = document.getElementById("code-editor").value;
+      const testCase = document.getElementById("test-case").value.trim();
+      const expectedOutput = document.getElementById("expected-output").value.trim();
+
+      const runOutput = solutionCode.includes(expectedOutput); // Fake check
+      if (!runOutput) {
+        alert("❌ Test case failed. Output doesn't match expected.");
+        return;
+      }
+
       const endTime = new Date();
       const timeTaken = ((endTime - startTime) / 60000).toFixed(2);
-      alert(`Submitted! Time taken: ${timeTaken} min`);
-    }
+      const date = new Date().toISOString().split("T")[0];
+      const category = document.getElementById("category").value;
+      const username = auth.currentUser.email.split("@")[0];
 
-    function loadQuestionByDate() {
+      const filename = `${username}_${date}.txt`;
+      const content = `Code:\n${solutionCode}\nTime: ${timeTaken} min\nCategory: ${category}`;
+
+      const blob = new Blob([content], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+
+      const emailKey = auth.currentUser.email.replace(/[^a-zA-Z0-9]/g, "_");
+      const entry = {
+        email: auth.currentUser.email,
+        time: timeTaken,
+        submittedAt: Date.now(),
+        passed: true
+      };
+
+      set(ref(db, `leaderboard/${date}/${category}/${emailKey}`), entry)
+        .then(() => alert("✅ Submitted and saved as file!"))
+        .catch((err) => alert("❌ Submission failed: " + err.message));
+    };
+
+    window.loadQuestionByDate = function () {
       const selectedDate = document.getElementById("datePicker").value;
       const category = document.getElementById("category").value;
       if (!selectedDate) return;
@@ -220,7 +129,67 @@
         .then((res) => (res.ok ? res.text() : Promise.reject("Question not found.")))
         .then((text) => (document.getElementById("daily-question").textContent = text))
         .catch((err) => (document.getElementById("daily-question").textContent = "❌ " + err));
-    }
+    };
+
+    window.onload = () => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("datePicker").value = today;
+      loadQuestionByDate();
+    };
   </script>
+  <style>
+    textarea {
+      width: 100%;
+      height: 200px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-section">
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="signupUser()">Signup</button>
+    <button onclick="loginUser()">Login</button>
+  </div>
+
+  <div class="calendar-controls">
+    <label for="datePicker">📅</label>
+    <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
+    <select id="category" onchange="loadQuestionByDate()">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </div>
+
+  <h2>Challenge</h2>
+  <pre id="daily-question">Loading...</pre>
+
+  <h2>Code Editor</h2>
+  <textarea id="code-editor" placeholder="Write your code here..."></textarea>
+
+  <h3>Test Case</h3>
+  <textarea id="test-case" placeholder="Paste sample input..."></textarea>
+  <textarea id="expected-output" placeholder="Expected output..."></textarea>
+
+  <div>
+    <button onclick="startTimer()">Start</button>
+    <span id="timerDisplay">0 sec</span>
+    <button onclick="submitSolution()">Submit</button>
+  </div>
+
+  <div id="leaderboard-section">
+    <h2>Leaderboard</h2>
+    <table id="leaderboard">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </body>
 </html>
