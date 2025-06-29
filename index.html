@@ -106,6 +106,7 @@
 
     #leaderboard-section {
       margin-top: 20px;
+      padding: 20px;
     }
   </style>
 </head>
@@ -134,6 +135,7 @@
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
+    <button onclick="submitSolution()">📤 Submit</button>
   </div>
 
   <div class="main-section">
@@ -147,7 +149,7 @@
     </div>
 
     <div class="right-panel">
-      <iframe src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
+      <iframe id="code-ide" src="https://paiza.io/projects/e/TEbxzXUbU7xkq10irnTkUw?theme=twilight" scrolling="no" seamless="seamless"></iframe>
     </div>
   </div>
 
@@ -199,6 +201,39 @@
         document.getElementById("daily-question").innerText = text;
       } catch (error) {
         document.getElementById("daily-question").innerHTML = `<span style="color:red;">⚠️ Unable to load question: ${error.message}</span>`;
+      }
+    }
+
+    async function submitSolution() {
+      const name = document.getElementById("username").value.trim();
+      if (!name) return alert("Please enter your username before submitting.");
+
+      const solutionCode = "Code submitted via IDE (placeholder)."; // You can enhance this via paiza API in future
+
+      const today = new Date();
+      const day = today.getDate();
+      const filename = `solutions/${name.replace(/\s+/g, "_").toLowerCase()}_Day${day}.txt`;
+      const content = btoa(`User: ${name}\nDate: ${today.toDateString()}\n\n${solutionCode}`);
+
+      const res = await fetch(`https://api.github.com/repos/Vvk1amzn2sd/DSA_practise_vvk/contents/${filename}`, {
+        method: "PUT",
+        headers: {
+          Authorization: "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",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: `Submit solution from ${name}`,
+          content: content,
+          branch: "main"
+        })
+      });
+
+      if (res.ok) {
+        alert("✅ Solution submitted and pushed to GitHub.");
+      } else {
+        const err = await res.json();
+        alert("❌ Submission failed: " + (err.message || "Unknown error"));
+        console.error(err);
       }
     }
   </script>
