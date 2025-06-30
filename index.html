@@ -1,256 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DSA Challenge Hub</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>DSA Challenge</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f9f9fb;
-      color: #333;
       margin: 0;
-      padding: 0;
+      font-family: sans-serif;
+      transition: background 0.3s, color 0.3s;
     }
-    .container {
-      display: grid;
-      grid-template-columns: 1fr 3fr 1fr;
-      gap: 10px;
+
+    .dark-mode {
+      background-color: #121212;
+      color: #f0f0f0;
+    }
+
+    #topBar {
       padding: 10px;
-    }
-    .auth-section, .calendar-controls, .editor-section, .leaderboard-section {
-      padding: 15px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    input, select, textarea, button {
-      padding: 10px;
-      margin: 5px 0;
-      font-size: 1em;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    textarea {
-      width: 100%;
-      font-family: monospace;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    h2, h3 {
-      margin-top: 0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-    th, td {
-      padding: 8px;
-      text-align: center;
-    }
-    iframe {
-      width: 100%;
-      height: 600px;
-      border: none;
-      margin-top: 10px;
-    }
-    #chart-container {
-      margin-top: 20px;
-    }
-    .social-login {
+      background: #e0e0e0;
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
       align-items: center;
     }
-    .social-login button {
+
+    #challengeContainer {
+      display: flex;
+      height: calc(100vh - 50px);
+    }
+
+    #questionArea {
+      background: #f0f0f0;
+      padding: 20px;
+      flex: 2;
+      overflow-y: auto;
+    }
+
+    #leaderboardPanel {
+      background: #fafafa;
+      padding: 20px;
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      border-left: 1px solid #ccc;
+      overflow-y: auto;
     }
-    .footer {
-      text-align: center;
-      margin: 20px 0;
-      font-family: cursive;
-      color: #666;
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .dark-mode #questionArea {
+      background: #2c2c2c;
+    }
+
+    .dark-mode #leaderboardPanel {
+      background: #1f1f1f;
+    }
+
+    button {
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="auth-section">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="signupUser()">Signup</button>
-    <button onclick="loginUser()">Login</button>
-    <div class="social-login">
-      <button onclick="googleLogin()">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
-      </button>
-      <button disabled>
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
-      </button>
-    </div>
+
+  <div id="topBar">
+    <span>🔥 Daily DSA Challenge</span>
+    <button onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
   </div>
 
-  <div class="calendar-controls">
-    <label for="datePicker">📅</label>
-    <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
-    <select id="category" onchange="loadQuestionByDate()">
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-  </div>
-
-  <div class="container">
-    <div class="leaderboard-section">
-      <h3>Weekly Leaderboard</h3>
-      <div id="weekly-chart-container">
-        <canvas id="weeklyChart"></canvas>
-      </div>
-      <h3>Monthly Leaderboard</h3>
-      <div id="monthly-chart-container">
-        <canvas id="monthlyChart"></canvas>
-      </div>
-    </div>
-
-    <div class="editor-section">
+  <div id="challengeContainer">
+    <div id="questionArea">
       <h2>Challenge</h2>
-      <pre id="daily-question">Loading...</pre>
-
-      <h2>Code Editor</h2>
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
-
-      <h3>Test Case</h3>
-      <textarea id="test-case" rows="5" placeholder="Paste sample input..."></textarea>
-      <textarea id="expected-output" rows="5" placeholder="Expected output..."></textarea>
-
-      <div>
-        <button onclick="startTimer()">Start</button>
-        <span id="timerDisplay">0 sec</span>
-        <button onclick="submitSolution()">Submit</button>
-      </div>
+      <pre id="questionText">Loading...</pre>
     </div>
-  </div>
 
-  <div class="footer">
-     made with <3 for Atlas,by VVK.
+    <div id="leaderboardPanel">
+      <button onclick="toggleLeaderboardDate()">Toggle Day</button>
+      <h3 id="leaderboardTitle">Today's Leaderboard</h3>
+      <ul id="leaderboardList"></ul>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
-      authDomain: "dsa-challenge.firebaseapp.com",
-      databaseURL: "https://dsa-challenge-default-rtdb.asia-southeast1.firebasedatabase.app/",
-      projectId: "dsa-challenge",
-      storageBucket: "dsa-challenge.appspot.com",
-      messagingSenderId: "866070092409",
-      appId: "1:866070092409:web:49faada850b1b91bbf52a8"
+      // 🔒 Your Firebase config here
     };
-
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
 
-    window.signupUser = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      if (!email || !password) return alert("❌ Email and password required.");
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => alert("✅ Signup successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
+    let isToday = true;
 
-    window.loginUser = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      if (!email || !password) return alert("❌ Email and password required.");
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => alert("✅ Login successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
+    function toggleLeaderboardDate() {
+      isToday = !isToday;
+      document.getElementById("leaderboardTitle").innerText =
+        isToday ? "Today's Leaderboard" : "Yesterday's Leaderboard";
+      loadLeaderboard();
+    }
 
-    window.googleLogin = function () {
-      signInWithPopup(auth, provider)
-        .then(() => alert("✅ Google login successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
+    function formatDate(offset = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = d.toLocaleString("default", { month: "long" }).toLowerCase();
+      return `day_${day}_${month}`;
+    }
 
-    let timerInterval = null;
-    let startTime = null;
+    function loadLeaderboard() {
+      const dateKey = formatDate(isToday ? 0 : -1);
+      const category = "easy"; // or dynamically use from dropdown
+      const leaderboardRef = ref(db, `leaderboard/${dateKey}/${category}`);
 
-    window.startTimer = function () {
-      if (!auth.currentUser) return alert("❌ Please login first");
-      startTime = new Date();
-      const timerDisplay = document.getElementById("timerDisplay");
-      timerInterval = setInterval(() => {
-        const now = new Date();
-        const diff = Math.floor((now - startTime) / 1000);
-        timerDisplay.textContent = `${diff} sec`;
-      }, 1000);
-    };
+      onValue(leaderboardRef, (snapshot) => {
+        const data = snapshot.val();
+        const list = document.getElementById("leaderboardList");
+        list.innerHTML = "";
 
-    window.submitSolution = function () {
-      if (!auth.currentUser) return alert("❌ Login first");
-      if (!startTime) return alert("❌ Start timer first");
-      clearInterval(timerInterval);
+        if (data) {
+          const entries = Object.values(data);
+          entries.sort((a, b) => a.time - b.time);
+          entries.forEach(entry => {
+            const li = document.createElement("li");
+            li.textContent = `${entry.name} - ${entry.time}s`;
+            list.appendChild(li);
+          });
+        } else {
+          const li = document.createElement("li");
+          li.textContent = "No entries yet.";
+          list.appendChild(li);
+        }
+      });
+    }
 
-      const endTime = new Date();
-      const timeTaken = ((endTime - startTime) / 60000).toFixed(2);
-      const date = new Date().toISOString().split("T")[0];
-      const category = document.getElementById("category").value;
-      const emailKey = auth.currentUser.email.replace(/[^a-zA-Z0-9]/g, "_");
-
-      const entry = {
-        email: auth.currentUser.email,
-        time: timeTaken,
-        submittedAt: Date.now(),
-        passed: true
-      };
-
-      set(ref(db, `leaderboard/${date}/${category}/${emailKey}`), entry)
-        .then(() => alert("✅ Submitted to leaderboard!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
-
-    window.loadQuestionByDate = function () {
-      const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value;
-      if (!selectedDate) return;
-      const dateObj = new Date(selectedDate);
-      const day = dateObj.getDate();
-      const month = dateObj.toLocaleString("default", { month: "long" }).toUpperCase();
-      const filename = `Day${day}_${month}.txt`;
-      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
+    function loadQuestion() {
+      const today = formatDate(0);
+      const filename = `${today}_1.txt`; // fallback to first of the day
+      const url = `https://your-storage-url/questions/${filename}`; // adjust path
 
       fetch(url)
-        .then((res) => res.ok ? res.text() : Promise.reject("Question not found."))
-        .then((text) => (document.getElementById("daily-question").textContent = text))
-        .catch((err) => (document.getElementById("daily-question").textContent = "❌ " + err));
-    };
+        .then(res => res.ok ? res.text() : "Challenge not found.")
+        .then(text => {
+          document.getElementById("questionText").textContent = text;
+        })
+        .catch(() => {
+          document.getElementById("questionText").textContent = "Challenge not available.";
+        });
+    }
 
-    window.onload = () => {
-      const today = new Date().toISOString().split("T")[0];
-      document.getElementById("datePicker").value = today;
-      loadQuestionByDate();
-    };
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    // Load on start
+    loadLeaderboard();
+    loadQuestion();
   </script>
 </body>
 </html>
