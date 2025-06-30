@@ -47,26 +47,11 @@
     h2, h3 {
       margin-top: 0;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-    th, td {
-      padding: 8px;
-      text-align: center;
-    }
     iframe {
       width: 100%;
       height: 600px;
       border: none;
       margin-top: 10px;
-    }
-    #chart-container {
-      margin-top: 20px;
     }
     .social-login {
       display: flex;
@@ -127,13 +112,12 @@
     </div>
 
     <div class="editor-section">
-<h2>Code Editor</h2>
-<iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+      <h2>Code Editor</h2>
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
 
-<h3>Your Code</h3>
-<textarea id="userCode" rows="10" placeholder="Write your code here..."></textarea>
-<button onclick="submitCodeAsText()">📤 Submit Code as Text</button>
-
+      <h3>Your Code</h3>
+      <textarea id="userCode" rows="10" placeholder="Write your code here..."></textarea>
+      <button onclick="submitCodeAsText()">📤 Submit Code as Text</button>
 
       <div>
         <button onclick="startTimer()">Start</button>
@@ -144,7 +128,7 @@
   </div>
 
   <div class="footer">
-     made with <3 for Atlas,by VVK.
+     made with <3 for Atlas, by VVK.
   </div>
 
   <script type="module">
@@ -226,6 +210,32 @@
       set(ref(db, `leaderboard/${date}/${category}/${emailKey}`), entry)
         .then(() => alert("✅ Submitted to leaderboard!"))
         .catch((err) => alert("❌ " + err.message));
+    };
+
+    window.submitCodeAsText = function () {
+      const user = auth.currentUser;
+      if (!user) return alert("❌ Login required");
+
+      const code = document.getElementById("userCode").value.trim();
+      if (!code) return alert("❌ Code is empty");
+
+      const name = (user.displayName || user.email || "anon")
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .substring(0, 5)
+        .toLowerCase();
+
+      const today = new Date().toISOString().split("T")[0];
+      const path = `code_submissions/${today}/${name}.txt`;
+
+      const entry = {
+        email: user.email,
+        code: code,
+        submittedAt: Date.now()
+      };
+
+      set(ref(db, path), entry)
+        .then(() => alert(`✅ Code saved as ${name}.txt`))
+        .catch((err) => alert("❌ Error: " + err.message));
     };
 
     window.loadQuestionByDate = function () {
