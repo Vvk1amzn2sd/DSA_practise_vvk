@@ -1,84 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .dark-mode {
-      background-color: #121212;
-      color: #f0f0f0;
-    }
-
-    #topBar {
-      padding: 10px;
-      background: #e0e0e0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #challengeContainer {
-      display: flex;
-      height: calc(100vh - 50px);
-    }
-
-    #questionArea {
-      background: #f0f0f0;
-      padding: 20px;
-      flex: 2;
-      overflow-y: auto;
-    }
-
-    #leaderboardPanel {
-      background: #fafafa;
-      padding: 20px;
-      flex: 1;
-      border-left: 1px solid #ccc;
-      overflow-y: auto;
-    }
-
-    ul {
-      padding-left: 20px;
-    }
-
-    .dark-mode #questionArea {
-      background: #2c2c2c;
-    }
-
-    .dark-mode #leaderboardPanel {
-      background: #1f1f1f;
-    }
-
-    button {
-      margin-bottom: 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- Top Bar -->
   <div id="topBar">
-    <span>🔥 Daily DSA Challenge</span>
+    <h2>🔥 DSA Challenge</h2>
     <button onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
   </div>
 
-  <div id="challengeContainer">
-    <div id="questionArea">
-      <h2>Challenge</h2>
-      <pre id="questionText">Loading...</pre>
-    </div>
-
+  <!-- Layout: Leaderboard Left, Content Right -->
+  <div id="layoutContainer">
+    
+    <!-- Left: Leaderboard -->
     <div id="leaderboardPanel">
       <button onclick="toggleLeaderboardDate()">Toggle Day</button>
-      <h3 id="leaderboardTitle">Today's Leaderboard</h3>
+      <h4 id="leaderboardTitle">Today's Toppers</h4>
       <ul id="leaderboardList"></ul>
     </div>
+
+    <!-- Right: Question & IDE -->
+    <div id="mainContent">
+      <h2>Challenge</h2>
+      <pre id="questionText">Loading...</pre>
+      <!-- Add your IDE below -->
+    </div>
+
   </div>
 
+  <!-- Firebase + App Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -86,15 +41,23 @@
     const firebaseConfig = {
       // 🔒 Your Firebase config here
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
     let isToday = true;
 
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      document.getElementById("leaderboardPanel").classList.toggle("dark-panel");
+      document.getElementById("mainContent").classList.toggle("dark-panel");
+      document.getElementById("topBar").classList.toggle("dark-topbar");
+    }
+
     function toggleLeaderboardDate() {
       isToday = !isToday;
       document.getElementById("leaderboardTitle").innerText =
-        isToday ? "Today's Leaderboard" : "Yesterday's Leaderboard";
+        isToday ? "Today's Toppers" : "Yesterday's Toppers";
       loadLeaderboard();
     }
 
@@ -108,9 +71,9 @@
 
     function loadLeaderboard() {
       const dateKey = formatDate(isToday ? 0 : -1);
-      const category = "easy"; // or dynamically use from dropdown
-      const leaderboardRef = ref(db, `leaderboard/${dateKey}/${category}`);
+      const category = "easy"; // Update if needed
 
+      const leaderboardRef = ref(db, `leaderboard/${dateKey}/${category}`);
       onValue(leaderboardRef, (snapshot) => {
         const data = snapshot.val();
         const list = document.getElementById("leaderboardList");
@@ -126,34 +89,29 @@
           });
         } else {
           const li = document.createElement("li");
-          li.textContent = "No entries yet.";
+          li.textContent = "No entries.";
           list.appendChild(li);
         }
       });
     }
 
     function loadQuestion() {
-      const today = formatDate(0);
-      const filename = `${today}_1.txt`; // fallback to first of the day
-      const url = `https://your-storage-url/questions/${filename}`; // adjust path
+      const dateKey = formatDate(0);
+      const fileUrl = `https://your-path/questions/${dateKey}_1.txt`; // update path if needed
 
-      fetch(url)
-        .then(res => res.ok ? res.text() : "Challenge not found.")
+      fetch(fileUrl)
+        .then(res => res.ok ? res.text() : Promise.resolve("No challenge found."))
         .then(text => {
           document.getElementById("questionText").textContent = text;
         })
         .catch(() => {
-          document.getElementById("questionText").textContent = "Challenge not available.";
+          document.getElementById("questionText").textContent = "Error loading question.";
         });
     }
 
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
-    }
-
-    // Load on start
     loadLeaderboard();
     loadQuestion();
   </script>
+
 </body>
 </html>
