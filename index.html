@@ -8,14 +8,14 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f0f2f5;
+      background-color: #f9f9fb;
       color: #333;
       margin: 0;
       padding: 0;
     }
     .container {
       display: grid;
-      grid-template-columns: 1fr 2fr 1fr;
+      grid-template-columns: 1fr 3fr 1fr;
       gap: 10px;
       padding: 10px;
     }
@@ -68,6 +68,24 @@
     #chart-container {
       margin-top: 20px;
     }
+    .social-login {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .social-login button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .footer {
+      text-align: center;
+      margin: 20px 0;
+      font-family: cursive;
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -76,7 +94,14 @@
     <input type="password" id="password" placeholder="Password" />
     <button onclick="signupUser()">Signup</button>
     <button onclick="loginUser()">Login</button>
-    <button onclick="googleLogin()">Login with Google</button>
+    <div class="social-login">
+      <button onclick="googleLogin()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
+      </button>
+      <button disabled>
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
+      </button>
+    </div>
   </div>
 
   <div class="calendar-controls">
@@ -95,6 +120,10 @@
       <div id="weekly-chart-container">
         <canvas id="weeklyChart"></canvas>
       </div>
+      <h3>Monthly Leaderboard</h3>
+      <div id="monthly-chart-container">
+        <canvas id="monthlyChart"></canvas>
+      </div>
     </div>
 
     <div class="editor-section">
@@ -102,7 +131,7 @@
       <pre id="daily-question">Loading...</pre>
 
       <h2>Code Editor</h2>
-      <iframe src="https://paiza.io/projects/WKE5q0wim22IakO8Uzmn5w?embed" allowfullscreen></iframe>
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
 
       <h3>Test Case</h3>
       <textarea id="test-case" rows="5" placeholder="Paste sample input..."></textarea>
@@ -114,19 +143,16 @@
         <button onclick="submitSolution()">Submit</button>
       </div>
     </div>
+  </div>
 
-    <div class="leaderboard-section">
-      <h3>Monthly Leaderboard</h3>
-      <div id="monthly-chart-container">
-        <canvas id="monthlyChart"></canvas>
-      </div>
-    </div>
+  <div class="footer">
+     made with <3 for Atlas,by VVK.
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
@@ -190,7 +216,6 @@
       const timeTaken = ((endTime - startTime) / 60000).toFixed(2);
       const date = new Date().toISOString().split("T")[0];
       const category = document.getElementById("category").value;
-      const username = auth.currentUser.email.split("@")[0];
       const emailKey = auth.currentUser.email.replace(/[^a-zA-Z0-9]/g, "_");
 
       const entry = {
