@@ -127,15 +127,13 @@
     </div>
 
     <div class="editor-section">
-      <h2>Challenge</h2>
-      <pre id="daily-question">Loading...</pre>
+<h2>Code Editor</h2>
+<iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
 
-      <h2>Code Editor</h2>
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+<h3>Your Code</h3>
+<textarea id="userCode" rows="10" placeholder="Write your code here..."></textarea>
+<button onclick="submitCodeAsText()">📤 Submit Code as Text</button>
 
-      <h3>Test Case</h3>
-      <textarea id="test-case" rows="5" placeholder="Paste sample input..."></textarea>
-      <textarea id="expected-output" rows="5" placeholder="Expected output..."></textarea>
 
       <div>
         <button onclick="startTimer()">Start</button>
