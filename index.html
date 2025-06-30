@@ -13,17 +13,21 @@
       margin: 0;
       padding: 0;
     }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 10px;
+      padding: 10px;
+    }
     .auth-section, .calendar-controls, .editor-section, .leaderboard-section {
       padding: 15px;
       background: white;
-      margin: 10px auto;
-      max-width: 900px;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     input, select, textarea, button {
       padding: 10px;
-      margin: 5px;
+      margin: 5px 0;
       font-size: 1em;
       border-radius: 5px;
       border: 1px solid #ccc;
@@ -57,12 +61,11 @@
     }
     iframe {
       width: 100%;
-      height: 500px;
+      height: 600px;
       border: none;
       margin-top: 10px;
     }
     #chart-container {
-      width: 100%;
       margin-top: 20px;
     }
   </style>
@@ -85,40 +88,43 @@
     </select>
   </div>
 
-  <div class="editor-section">
-    <h2>Challenge</h2>
-    <pre id="daily-question">Loading...</pre>
-
-    <h2>Code Editor</h2>
-    <iframe src="https://paiza.io/projects/WKE5q0wim22IakO8Uzmn5w?embed" allowfullscreen></iframe>
-
-    <h3>Test Case</h3>
-    <textarea id="test-case" rows="5" placeholder="Paste sample input..."></textarea>
-    <textarea id="expected-output" rows="5" placeholder="Expected output..."></textarea>
-
-    <div>
-      <button onclick="startTimer()">Start</button>
-      <span id="timerDisplay">0 sec</span>
-      <button onclick="submitSolution()">Submit</button>
+  <div class="container">
+    <div class="leaderboard-section">
+      <h3>Weekly Leaderboard</h3>
+      <div id="weekly-chart-container">
+        <canvas id="weeklyChart"></canvas>
+      </div>
     </div>
-  </div>
 
-  <div class="leaderboard-section">
-    <h2>Leaderboard</h2>
-    <table id="leaderboard">
-      <thead>
-        <tr><th>Email</th><th>Time</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="chart-container">
-      <canvas id="barChart"></canvas>
+    <div class="editor-section">
+      <h2>Challenge</h2>
+      <pre id="daily-question">Loading...</pre>
+
+      <h2>Code Editor</h2>
+      <iframe src="https://paiza.io/projects/WKE5q0wim22IakO8Uzmn5w?embed" allowfullscreen></iframe>
+
+      <h3>Test Case</h3>
+      <textarea id="test-case" rows="5" placeholder="Paste sample input..."></textarea>
+      <textarea id="expected-output" rows="5" placeholder="Expected output..."></textarea>
+
+      <div>
+        <button onclick="startTimer()">Start</button>
+        <span id="timerDisplay">0 sec</span>
+        <button onclick="submitSolution()">Submit</button>
+      </div>
+    </div>
+
+    <div class="leaderboard-section">
+      <h3>Monthly Leaderboard</h3>
+      <div id="monthly-chart-container">
+        <canvas id="monthlyChart"></canvas>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -128,13 +134,13 @@
       projectId: "dsa-challenge",
       storageBucket: "dsa-challenge.appspot.com",
       messagingSenderId: "866070092409",
-      appId: "1:866070092409:web:49faada850b1b91bbf52a8",
-      measurementId: "G-P3Y7XMJN2L"
+      appId: "1:866070092409:web:49faada850b1b91bbf52a8"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
 
     window.signupUser = function () {
       const email = document.getElementById("email").value;
@@ -151,6 +157,12 @@
       if (!email || !password) return alert("❌ Email and password required.");
       signInWithEmailAndPassword(auth, email, password)
         .then(() => alert("✅ Login successful!"))
+        .catch((err) => alert("❌ " + err.message));
+    };
+
+    window.googleLogin = function () {
+      signInWithPopup(auth, provider)
+        .then(() => alert("✅ Google login successful!"))
         .catch((err) => alert("❌ " + err.message));
     };
 
@@ -188,10 +200,7 @@
       };
 
       set(ref(db, `leaderboard/${date}/${category}/${emailKey}`), entry)
-        .then(() => {
-          alert("✅ Submitted to leaderboard!");
-          drawBarChart();
-        })
+        .then(() => alert("✅ Submitted to leaderboard!"))
         .catch((err) => alert("❌ " + err.message));
     };
 
@@ -206,60 +215,10 @@
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
 
       fetch(url)
-        .then((res) => (res.ok ? res.text() : Promise.reject("Question not found.")))
+        .then((res) => res.ok ? res.text() : Promise.reject("Question not found."))
         .then((text) => (document.getElementById("daily-question").textContent = text))
         .catch((err) => (document.getElementById("daily-question").textContent = "❌ " + err));
-
-      loadLeaderboard();
     };
-
-    function loadLeaderboard() {
-      const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value;
-      const date = new Date(selectedDate).toISOString().slice(0, 10);
-      const tableBody = document.querySelector("#leaderboard tbody");
-      tableBody.innerHTML = "";
-
-      const leaderboardRef = ref(db, `leaderboard/${date}/${category}`);
-      onValue(leaderboardRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data) {
-          tableBody.innerHTML = "<tr><td colspan='2'>No submissions yet</td></tr>";
-          return;
-        }
-        const entries = Object.values(data).sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
-        for (const entry of entries) {
-          const row = tableBody.insertRow();
-          row.insertCell(0).textContent = entry.email;
-          row.insertCell(1).textContent = entry.time + " min";
-        }
-        drawBarChart(entries);
-      });
-    }
-
-    function drawBarChart(entries = []) {
-      const ctx = document.getElementById("barChart").getContext("2d");
-      if (window.barChartInstance) window.barChartInstance.destroy();
-      const emails = entries.map((e) => e.email);
-      const times = entries.map((e) => e.time);
-      window.barChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: emails,
-          datasets: [{
-            label: 'Time (minutes)',
-            data: times,
-            backgroundColor: '#4CAF50'
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
-    }
 
     window.onload = () => {
       const today = new Date().toISOString().split("T")[0];
