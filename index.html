@@ -67,6 +67,28 @@
         .then(() => alert("✅ Code submitted successfully"))
         .catch((err) => alert("❌ Submission failed: " + err.message));
     };
+
+    window.loadQuestionByDate = function () {
+      const selectedDate = document.getElementById("datePicker").value;
+      const category = document.getElementById("category").value;
+      if (!selectedDate) return;
+      const dateObj = new Date(selectedDate);
+      const day = dateObj.getDate();
+      const month = dateObj.toLocaleString("default", { month: "long" }).toUpperCase();
+      const filename = `${day}_${month}_DAY${day}_${category}.txt`;
+      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/questions/${category}/${filename}`;
+
+      fetch(url)
+        .then(res => res.ok ? res.text() : Promise.reject("❌ Question not found."))
+        .then(text => document.getElementById("daily-question").textContent = text)
+        .catch(err => document.getElementById("daily-question").textContent = err);
+    };
+
+    window.onload = () => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("datePicker").value = today;
+      loadQuestionByDate();
+    };
   </script>
   <style>
     body {
@@ -169,8 +191,8 @@
 
 <div class="calendar-controls">
   <label for="datePicker">📅</label>
-  <input type="date" id="datePicker" />
-  <select id="category">
+  <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
+  <select id="category" onchange="loadQuestionByDate()">
     <option value="easy">Easy</option>
     <option value="medium">Medium</option>
     <option value="hard">Hard</option>
