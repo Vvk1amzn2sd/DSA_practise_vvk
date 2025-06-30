@@ -5,6 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getStorage, ref as sRef, uploadString } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
+      authDomain: "dsa-challenge.firebaseapp.com",
+      databaseURL: "https://dsa-challenge-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "dsa-challenge",
+      storageBucket: "dsa-challenge.appspot.com",
+      messagingSenderId: "866070092409",
+      appId: "1:866070092409:web:49faada850b1b91bbf52a8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+    const provider = new GoogleAuthProvider();
+
+    window.signupUser = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      if (!email || !password) return alert("❌ Email and password required.");
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => alert("✅ Signup successful!"))
+        .catch((err) => alert("❌ " + err.message));
+    };
+
+    window.loginUser = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      if (!email || !password) return alert("❌ Email and password required.");
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => alert("✅ Login successful!"))
+        .catch((err) => alert("❌ " + err.message));
+    };
+
+    window.googleLogin = function () {
+      signInWithPopup(auth, provider)
+        .then(() => alert("✅ Google login successful!"))
+        .catch((err) => alert("❌ " + err.message));
+    };
+
+    window.submitCodeAsText = function () {
+      if (!auth.currentUser) return alert("❌ Login first");
+      const code = document.getElementById("userCode").value;
+      if (!code) return alert("❌ Code is empty");
+
+      const email = auth.currentUser.email;
+      const username = email.split("@")[0].substring(0, 5);
+      const date = new Date().toISOString().split("T")[0];
+      const filename = `${username}_${date}.txt`;
+      const storagePath = `submissions/${filename}`;
+
+      const fileRef = sRef(storage, storagePath);
+      uploadString(fileRef, code)
+        .then(() => alert("✅ Code submitted successfully"))
+        .catch((err) => alert("❌ Submission failed: " + err.message));
+    };
+  </script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -47,11 +110,26 @@
     h2, h3 {
       margin-top: 0;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+    }
     iframe {
       width: 100%;
       height: 600px;
       border: none;
       margin-top: 10px;
+    }
+    #chart-container {
+      margin-top: 20px;
     }
     .social-login {
       display: flex;
@@ -74,191 +152,61 @@
   </style>
 </head>
 <body>
-  <div class="auth-section">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="signupUser()">Signup</button>
-    <button onclick="loginUser()">Login</button>
-    <div class="social-login">
-      <button onclick="googleLogin()">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
-      </button>
-      <button disabled>
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
-      </button>
+ <div class="auth-section">
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="signupUser()">Signup</button>
+  <button onclick="loginUser()">Login</button>
+  <div class="social-login">
+    <button onclick="googleLogin()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
+    </button>
+    <button disabled>
+      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
+    </button>
+  </div>
+</div>
+
+<div class="calendar-controls">
+  <label for="datePicker">📅</label>
+  <input type="date" id="datePicker" />
+  <select id="category">
+    <option value="easy">Easy</option>
+    <option value="medium">Medium</option>
+    <option value="hard">Hard</option>
+  </select>
+</div>
+
+<div class="container">
+  <div class="leaderboard-section">
+    <h3>Weekly Leaderboard</h3>
+    <div id="weekly-chart-container"><canvas id="weeklyChart"></canvas></div>
+    <h3>Monthly Leaderboard</h3>
+    <div id="monthly-chart-container"><canvas id="monthlyChart"></canvas></div>
+  </div>
+
+  <div class="editor-section">
+    <h2>Challenge</h2>
+    <pre id="daily-question">Loading...</pre>
+
+    <h2>Code Editor</h2>
+    <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+
+    <h3>Your Code</h3>
+    <textarea id="userCode" rows="10" placeholder="Write your code here..."></textarea>
+    <button onclick="submitCodeAsText()">📤 Submit Code as Text</button>
+
+    <div>
+      <button onclick="startTimer()">Start</button>
+      <span id="timerDisplay">0 sec</span>
+      <button onclick="submitSolution()">Submit</button>
     </div>
   </div>
+</div>
 
-  <div class="calendar-controls">
-    <label for="datePicker">📅</label>
-    <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
-    <select id="category" onchange="loadQuestionByDate()">
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-  </div>
+<div class="footer">
+  made with <3 for Atlas, by VVK.
+</div>
 
-  <div class="container">
-    <div class="leaderboard-section">
-      <h3>Weekly Leaderboard</h3>
-      <div id="weekly-chart-container">
-        <canvas id="weeklyChart"></canvas>
-      </div>
-      <h3>Monthly Leaderboard</h3>
-      <div id="monthly-chart-container">
-        <canvas id="monthlyChart"></canvas>
-      </div>
-    </div>
-
-    <div class="editor-section">
-      <h2>Code Editor</h2>
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
-
-      <h3>Your Code</h3>
-      <textarea id="userCode" rows="10" placeholder="Write your code here..."></textarea>
-      <button onclick="submitCodeAsText()">📤 Submit Code as Text</button>
-
-      <div>
-        <button onclick="startTimer()">Start</button>
-        <span id="timerDisplay">0 sec</span>
-        <button onclick="submitSolution()">Submit</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">
-     made with <3 for Atlas, by VVK.
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
-      authDomain: "dsa-challenge.firebaseapp.com",
-      databaseURL: "https://dsa-challenge-default-rtdb.asia-southeast1.firebasedatabase.app/",
-      projectId: "dsa-challenge",
-      storageBucket: "dsa-challenge.appspot.com",
-      messagingSenderId: "866070092409",
-      appId: "1:866070092409:web:49faada850b1b91bbf52a8"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
-
-    window.signupUser = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      if (!email || !password) return alert("❌ Email and password required.");
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => alert("✅ Signup successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
-
-    window.loginUser = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      if (!email || !password) return alert("❌ Email and password required.");
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => alert("✅ Login successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
-
-    window.googleLogin = function () {
-      signInWithPopup(auth, provider)
-        .then(() => alert("✅ Google login successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
-
-    let timerInterval = null;
-    let startTime = null;
-
-    window.startTimer = function () {
-      if (!auth.currentUser) return alert("❌ Please login first");
-      startTime = new Date();
-      const timerDisplay = document.getElementById("timerDisplay");
-      timerInterval = setInterval(() => {
-        const now = new Date();
-        const diff = Math.floor((now - startTime) / 1000);
-        timerDisplay.textContent = `${diff} sec`;
-      }, 1000);
-    };
-
-    window.submitSolution = function () {
-      if (!auth.currentUser) return alert("❌ Login first");
-      if (!startTime) return alert("❌ Start timer first");
-      clearInterval(timerInterval);
-
-      const endTime = new Date();
-      const timeTaken = ((endTime - startTime) / 60000).toFixed(2);
-      const date = new Date().toISOString().split("T")[0];
-      const category = document.getElementById("category").value;
-      const emailKey = auth.currentUser.email.replace(/[^a-zA-Z0-9]/g, "_");
-
-      const entry = {
-        email: auth.currentUser.email,
-        time: timeTaken,
-        submittedAt: Date.now(),
-        passed: true
-      };
-
-      set(ref(db, `leaderboard/${date}/${category}/${emailKey}`), entry)
-        .then(() => alert("✅ Submitted to leaderboard!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
-
-    window.submitCodeAsText = function () {
-      const user = auth.currentUser;
-      if (!user) return alert("❌ Login required");
-
-      const code = document.getElementById("userCode").value.trim();
-      if (!code) return alert("❌ Code is empty");
-
-      const name = (user.displayName || user.email || "anon")
-        .replace(/[^a-zA-Z0-9]/g, "")
-        .substring(0, 5)
-        .toLowerCase();
-
-      const today = new Date().toISOString().split("T")[0];
-      const path = `code_submissions/${today}/${name}.txt`;
-
-      const entry = {
-        email: user.email,
-        code: code,
-        submittedAt: Date.now()
-      };
-
-      set(ref(db, path), entry)
-        .then(() => alert(`✅ Code saved as ${name}.txt`))
-        .catch((err) => alert("❌ Error: " + err.message));
-    };
-
-    window.loadQuestionByDate = function () {
-      const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value;
-      if (!selectedDate) return;
-      const dateObj = new Date(selectedDate);
-      const day = dateObj.getDate();
-      const month = dateObj.toLocaleString("default", { month: "long" }).toUpperCase();
-      const filename = `Day${day}_${month}.txt`;
-      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
-
-      fetch(url)
-        .then((res) => res.ok ? res.text() : Promise.reject("Question not found."))
-        .then((text) => (document.getElementById("daily-question").textContent = text))
-        .catch((err) => (document.getElementById("daily-question").textContent = "❌ " + err));
-    };
-
-    window.onload = () => {
-      const today = new Date().toISOString().split("T")[0];
-      document.getElementById("datePicker").value = today;
-      loadQuestionByDate();
-    };
-  </script>
 </body>
 </html>
