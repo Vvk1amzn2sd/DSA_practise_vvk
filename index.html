@@ -71,11 +71,12 @@
     window.loadQuestionByDate = function () {
       const selectedDate = document.getElementById("datePicker").value;
       const category = document.getElementById("category").value;
+      const dayNum = document.getElementById("dayNumber").value || 1;
       if (!selectedDate) return;
       const dateObj = new Date(selectedDate);
       const day = dateObj.getDate();
-      const month = dateObj.toLocaleString("default", { month: "long" }).toUpperCase();
-      const filename = `${day}_${month}_DAY${day}_${category}.txt`;
+      const month = dateObj.toLocaleString("default", { month: "short" }).toUpperCase();
+      const filename = `JUL${dayNum}.txt`;
       const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/questions/${category}/${filename}`;
 
       fetch(url)
@@ -197,6 +198,7 @@
     <option value="medium">Medium</option>
     <option value="hard">Hard</option>
   </select>
+  <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
 </div>
 
 <div class="container">
