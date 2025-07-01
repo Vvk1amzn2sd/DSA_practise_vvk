@@ -1,136 +1,144 @@
-/* styles.css */
-
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  padding: 0;
-  background-color: #f2f2f2;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
   color: #333;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.dark-mode {
-  background-color: #1f1f1f;
-  color: #f0f0f0;
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #e0e0e0;
+  font-size: 14px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.theme-toggle .icon {
+  margin-left: 6px;
+  font-size: 18px;
+}
+
+.leaderboard-controls select {
+  padding: 4px;
+  margin-right: 10px;
+}
+
+.attempt-counter {
+  font-weight: bold;
+}
+
+.main-container {
+  padding: 0 16px;
 }
 
 .header {
-  font-size: 1.8rem;
-  font-weight: bold;
-  padding: 0.5rem;
-  background: linear-gradient(90deg, #ff4d4d, #ff9999);
-  color: white;
   text-align: center;
-  margin-bottom: 0.5rem;
+  font-size: 26px;
+  font-family: 'Dancing Script', cursive;
+  color: darkred;
+  margin-top: 8px;
 }
 
-#liveChallengeBanner,
-#winnerLine {
+#winnerLine, #liveChallengeBanner {
   text-align: center;
-  margin: 0.25rem auto;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #6c63ff;
+  font-weight: bold;
+  margin: 6px 0;
 }
 
 .auth-section {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin: 0.5rem 0;
+  gap: 6px;
+  margin: 10px 0;
 }
 
-.auth-section input,
+.auth-section input {
+  padding: 5px;
+}
+
 .auth-section button {
-  padding: 0.4rem;
-  font-size: 0.9rem;
+  padding: 5px 10px;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  cursor: pointer;
 }
 
 .calendar-controls {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 0.5rem 0;
-  flex-wrap: wrap;
-}
-
-.calendar-controls select,
-.calendar-controls input {
-  padding: 0.3rem;
-  font-size: 0.9rem;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .content-container {
   display: flex;
-  height: 70vh;
-  margin: 0 1rem;
-  gap: 1rem;
+  height: calc(100vh - 220px);
 }
 
 .question-pane {
   width: 25%;
+  padding: 12px;
+  border-right: 1px solid #ccc;
   overflow-y: auto;
-  padding: 0.5rem;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  background: #fdfdfd;
 }
 
 .ide-pane {
   width: 75%;
-  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-#codeEditor {
-  width: 100%;
-  height: 100%;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.timer-controls {
+.ide-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0.5rem 1rem;
+  padding: 4px 12px;
+  background-color: #ddd;
+  font-size: 14px;
 }
 
-.start-button,
-.submit-button {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
-  background-color: #4caf50;
+.ide-controls .start-button,
+.ide-controls .submit-button {
+  background-color: #6200ea;
   color: white;
+  border: none;
+  padding: 6px 14px;
   cursor: pointer;
+  border-radius: 4px;
 }
 
-.submit-button {
-  background-color: #2196f3;
+.ide-controls .submit-button {
+  background-color: #d32f2f;
 }
 
 #timerDisplay {
-  font-size: 1rem;
   font-weight: bold;
-  color: #ff9800;
-  margin: 0 1rem;
+  font-size: 14px;
+}
+
+#codeEditor {
+  flex-grow: 1;
+  border: none;
+  width: 100%;
+  height: 100%;
 }
 
 .footer {
   text-align: center;
-  padding: 0.3rem;
-  background-color: #eaeaea;
   font-family: 'Dancing Script', cursive;
-  font-size: 1rem;
-  color: #c2185b;
-  position: sticky;
+  font-size: 14px;
+  padding: 8px 0;
+  background-color: #eee;
+  position: fixed;
   bottom: 0;
-}
-
-#themeSwitch {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
+  width: 100%;
 }
