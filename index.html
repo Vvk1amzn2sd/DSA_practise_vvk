@@ -35,26 +35,20 @@
     <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
   </div>
 
-  <div class="container">
-    <div class="editor-section">
+  <div class="split-container">
+    <div class="left-pane">
       <h2>Challenge</h2>
-      <pre id="daily-question">Loading...</pre>
-
+      <div id="daily-question" class="scrollable-questions">Loading...</div>
+    </div>
+    <div class="resizer"></div>
+    <div class="right-pane">
       <h2>Code Editor</h2>
       <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
-
       <div class="code-controls">
         <button onclick="startTimer()">Start</button>
         <span id="timerDisplay">0 sec</span>
         <button onclick="submitSolution()">Submit</button>
       </div>
-    </div>
-
-    <div class="leaderboard-section">
-      <h3>Weekly Leaderboard</h3>
-      <div id="weekly-chart-container"><canvas id="weeklyChart"></canvas></div>
-      <h3>Monthly Leaderboard</h3>
-      <div id="monthly-chart-container"><canvas id="monthlyChart"></canvas></div>
     </div>
   </div>
 
