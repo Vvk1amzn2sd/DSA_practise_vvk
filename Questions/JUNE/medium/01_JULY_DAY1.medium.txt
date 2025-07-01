@@ -1,0 +1,96 @@
+# DAY 1 Challenge – All the best! 💪
+
+🧠 Question: Delete Node in a Linked List  
+📘 Level: Medium  
+
+---
+
+📄 Description:
+
+There is a singly-linked list `head` and we want to delete a given node `node` in it.
+
+You are given the node to be deleted. You will **not** be given access to the first node of the list.
+
+All the values in the list are unique, and the node to be deleted is **guaranteed to not be the last node**.
+
+Your task is to **delete the given node** such that:
+- The node’s value no longer exists in the list  
+- The total number of nodes decreases by one  
+- The order of remaining nodes remains unchanged
+
+🚫 Do not remove the node from memory directly. Instead, **copy the data from the next node into the current node** and adjust pointers accordingly.
+
+---
+
+🔐 Constraints:
+- 1 <= Node.val <= 10^4  
+- Linked list length: 2 to 1000 nodes  
+- All values are unique  
+- Node to delete is not the tail  
+
+---
+
+📥 Function Signature (Java):
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+
+class Solution {
+    public void deleteNode(ListNode node) {
+        // your code here
+    }
+}
+
+
+
+📌 Sample Inputs & Outputs
+
+✅ Example 1:
+Input List:
+head → [1] → [2] → [3] → [4]
+Node to delete: [3]
+Output List:
+head → [1] → [2] → [4]
+
+✅ Example 2:
+Input List:
+head → [10] → [20] → [30] → [40]
+Node to delete: [20]
+Output List:
+head → [10] → [30] → [40]
+
+✅ Example 3 (short list):
+Input List:
+head → [5] → [6]
+Node to delete: [5]
+Output List:
+head → [6]
+
+📌 Edge Cases
+
+🧪 Edge Case 1:
+Input List:
+head → [101] → [102] → [103] → [104]
+Node to delete: [103]
+Output List:
+head → [101] → [102] → [104]
+
+🧪 Edge Case 2:
+Input List:
+head → [8] → [18] → [28] → [38] → [48]
+Node to delete: [38]
+Output List:
+head → [8] → [18] → [28] → [48]
+
+🧪 Edge Case 3:
+Input List:
+head → [9998] → [9999] → [10000]
+Node to delete: [9999]
+Output List:
+head → [9998] → [10000]
