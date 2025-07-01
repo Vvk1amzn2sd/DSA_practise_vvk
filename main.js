@@ -1,57 +1,52 @@
-// main.js
+// Firebase Configuration (ensure firebase.js is imported separately)
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { getDatabase, ref, set, push, update, get, child } from "firebase/database";
+import { initializeApp } from "firebase/app";
+import { marked } from "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
 
-import firebaseConfig from './firebase-config.js';
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set, push, get, child } from 'firebase/database';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { firebaseConfig } from './firebase.js';
 
 const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
 const auth = getAuth(app);
+const db = getDatabase(app);
 
+// DOM Elements
 const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 const datePicker = document.getElementById('datePicker');
-const categorySelect = document.getElementById('category');
 const problemSelect = document.getElementById('problemSelect');
+const categorySelect = document.getElementById('category');
 const dailyQuestion = document.getElementById('daily-question');
-const leaderboardDisplay = document.getElementById('leaderboardDisplay');
 const timerDisplay = document.getElementById('timerDisplay');
+const leaderboardDisplay = document.getElementById('leaderboardDisplay');
+const leaderboardType = document.getElementById('leaderboardType');
+const currentYear = document.getElementById('currentYear');
 
-let currentUser = null;
-let currentProblem = null;
+let timer = null;
 let seconds = 0;
-let timerInterval;
+let currentUser = null;
+let currentProblemURL = null;
 
-onAuthStateChanged(auth, user => {
-  if (user) {
-    currentUser = user;
-    document.querySelector('.auth-section').style.display = 'none';
-  } else {
-    currentUser = null;
-    document.querySelector('.auth-section').style.display = 'flex';
-  }
-});
+currentYear.textContent = new Date().getFullYear();
 
+// Auth
 window.signupUser = async () => {
-  const email = `${usernameInput.value}@dsachallenge.com`;
+  const username = usernameInput.value;
   const password = passwordInput.value;
+  const email = `${username}@dsa.com`;
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await set(ref(database, 'users/' + userCredential.user.uid), {
-      username: usernameInput.value,
-      created: Date.now()
-    });
-    alert('Signup successful!');
+    await createUserWithEmailAndPassword(auth, email, password);
+    alert('Signup successful');
   } catch (err) {
     alert(err.message);
   }
 };
 
 window.loginUser = async () => {
-  const email = `${usernameInput.value}@dsachallenge.com`;
+  const username = usernameInput.value;
   const password = passwordInput.value;
+  const email = `${username}@dsa.com`;
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
@@ -60,113 +55,130 @@ window.loginUser = async () => {
   }
 };
 
-window.loadQuestionByDate = async () => {
-  const date = new Date(datePicker.value);
-  const month = date.toLocaleString('default', { month: 'long' }).toUpperCase();
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+});
+
+// Load problems from GitHub based on month & category
+async function loadProblems() {
+  const month = new Date(datePicker.value).toLocaleString('en-us', { month: 'long' }).toUpperCase();
   const category = categorySelect.value;
 
-  const githubUrl = `https://api.github.com/repos/Vvk1amzn2sd/DSA_practise_vvk/contents/Questions/${month}/${category}`;
+  const url = `https://api.github.com/repos/Vvk1amzn2sd/DSA_practise_vvk/contents/Questions/${month}/${category}`;
   try {
-    const res = await fetch(githubUrl);
+    const res = await fetch(url);
     const files = await res.json();
-    const txtFiles = files.filter(f => f.name.endsWith('.txt') || f.name.endsWith('.md'));
-
-    txtFiles.sort((a, b) => new Date(a.git_url) - new Date(b.git_url)); // Approx by upload order
 
     problemSelect.innerHTML = '<option value="">Select Problem</option>';
-    txtFiles.forEach((file, idx) => {
-      const option = document.createElement('option');
-      option.value = file.download_url;
-      option.textContent = file.name.replace(/\.(txt|md)/, '');
-      problemSelect.appendChild(option);
+    files.forEach(file => {
+      if (file.name.endsWith('.md') || file.name.endsWith('.txt')) {
+        const opt = document.createElement('option');
+        opt.value = file.download_url;
+        opt.textContent = file.name.replace('.md', '').replace('.txt', '');
+        problemSelect.appendChild(opt);
+      }
     });
   } catch (err) {
     console.error(err);
+    alert('Error loading problems');
   }
-};
+}
 
-window.loadSelectedProblem = async () => {
+problemSelect.addEventListener('change', async () => {
   const url = problemSelect.value;
   if (!url) return;
-
   try {
     const res = await fetch(url);
     const text = await res.text();
-    currentProblem = {
-      title: problemSelect.options[problemSelect.selectedIndex].text,
-      content: text
-    };
-    dailyQuestion.innerHTML = `<h3>${currentProblem.title}</h3><pre>${text}</pre>`;
+    dailyQuestion.innerHTML = marked.parse(text);
+    currentProblemURL = url;
   } catch (err) {
     console.error(err);
-    dailyQuestion.textContent = 'Error loading problem';
+    alert('Error loading problem content');
   }
-};
+});
 
+categorySelect.addEventListener('change', loadProblems);
+datePicker.addEventListener('change', loadProblems);
+
+// Timer
 window.startTimer = () => {
-  clearInterval(timerInterval);
+  if (timer) clearInterval(timer);
   seconds = 0;
   timerDisplay.textContent = '0 sec';
-  timerInterval = setInterval(() => {
+  timer = setInterval(() => {
     seconds++;
     timerDisplay.textContent = `${seconds} sec`;
   }, 1000);
 };
 
+// Submit
 window.submitSolution = async () => {
-  clearInterval(timerInterval);
-  const timeTaken = seconds;
+  if (!currentUser) return alert('Please login first');
+  if (!currentProblemURL) return alert('No problem selected');
 
-  if (!currentUser || !currentProblem) {
-    alert('Please login and select a problem');
-    return;
-  }
+  const iframe = document.getElementById('codeEditor');
+  const code = iframe?.contentWindow?.document.getElementById('code')?.value || '';
 
+  if (!code.trim()) return alert('Code is empty');
+
+  clearInterval(timer);
   const userId = currentUser.uid;
-  const problemKey = `${datePicker.value}_${currentProblem.title}`;
-  const submissionRef = ref(database, `submissions/${problemKey}/${userId}`);
+  const username = currentUser.email.split('@')[0];
 
-  const snapshot = await get(submissionRef);
+  const todayKey = new Date().toISOString().split('T')[0];
+  const category = categorySelect.value;
+  const hash = btoa(currentProblemURL);
+
+  const submissionPath = `submissions/${category}/${todayKey}/${hash}/${userId}`;
+
+  const snapshot = await get(child(ref(db), submissionPath));
   if (snapshot.exists()) {
-    alert('Already submitted for this problem. Only one submission allowed.');
+    alert('You have already submitted this problem today');
     return;
   }
 
-  const code = document.getElementById('codeEditor').contentWindow?.document.getElementById('code')?.value || '';
-  await set(submissionRef, {
-    username: currentUser.email.split('@')[0],
-    timeTaken,
+  await set(ref(db, submissionPath), {
+    username,
     code,
+    timeTaken: seconds,
     submittedAt: Date.now()
   });
 
-  alert('Submitted successfully!');
+  alert(`Submitted in ${seconds} sec`);
+  timerDisplay.textContent = '0 sec';
 };
 
+// Leaderboard Toggle
 window.toggleLeaderboard = async () => {
-  const type = document.getElementById('leaderboardType').value;
-  const date = new Date(datePicker.value);
-  const category = categorySelect.value;
+  const type = leaderboardType.value;
+  leaderboardDisplay.innerHTML = 'Loading...';
 
-  const month = date.toLocaleString('default', { month: 'long' }).toUpperCase();
-  const keyPrefix = `${month}_${category}`;
-  const submissionsRef = ref(database, 'submissions');
-
-  const snapshot = await get(submissionsRef);
-  const all = snapshot.val();
-  const filtered = [];
-
-  for (const problemKey in all) {
-    if (!problemKey.startsWith(keyPrefix)) continue;
-    const submissions = all[problemKey];
-    for (const uid in submissions) {
-      const sub = submissions[uid];
-      filtered.push({ user: sub.username, time: sub.timeTaken });
-    }
+  const all = ref(db, 'submissions');
+  const snapshot = await get(all);
+  if (!snapshot.exists()) {
+    leaderboardDisplay.textContent = 'No data';
+    return;
   }
 
-  filtered.sort((a, b) => a.time - b.time);
+  const now = Date.now();
+  const data = snapshot.val();
+  const flat = [];
 
-  leaderboardDisplay.innerHTML = '<h4>Leaderboard</h4>' +
-    filtered.map((e, i) => `<div>${i + 1}. ${e.user} (${e.time}s)</div>`).join('');
+  Object.values(data).forEach(category => {
+    Object.entries(category).forEach(([date, problems]) => {
+      const ts = new Date(date).getTime();
+      const isValid = type === 'daily' ? ts >= now - 86400000 : ts >= now - 7 * 86400000;
+      if (!isValid) return;
+      Object.values(problems).forEach(problem => {
+        Object.values(problem).forEach(sub => {
+          flat.push(sub);
+        });
+      });
+    });
+  });
+
+  flat.sort((a, b) => a.timeTaken - b.timeTaken);
+  const top = flat.slice(0, 10);
+  leaderboardDisplay.innerHTML = top.map((x, i) => `${i + 1}. ${x.username} (${x.timeTaken}s)`).join('<br>');
 };
