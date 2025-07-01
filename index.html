@@ -10,8 +10,8 @@
 </head>
 <body>
   <div class="auth-section">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
+    <input type="text" id="email" placeholder="Username" maxlength="15" />
+    <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
     <button onclick="signupUser()">Signup</button>
     <button onclick="loginUser()">Login</button>
     <div class="social-login">
@@ -36,9 +36,9 @@
       <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
     </div>
     <div class="code-controls" style="display: flex; gap: 40px; padding: 0 20px;">
-      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px;">Start</button>
+      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px; margin-left: 10px;">Start</button>
       <span id="timerDisplay" style="align-self: center; font-weight: bold;">0 sec</span>
-      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px;">Submit</button>
+      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px; margin-right: 10px;">Submit</button>
     </div>
     <div class="theme-toggle">
       <label class="switch">
@@ -51,7 +51,7 @@
 
   <div class="split-container">
     <div class="left-pane" style="width: 25%;">
-      <div id="daily-question" class="scrollable-questions" style="margin-top: 0;">Loading...</div>
+      <div id="daily-question" class="scrollable-questions" style="margin-top: 0; background: #f0f0f0; height: calc(100vh - 130px);">Loading...</div>
     </div>
     <div class="resizer red" style="cursor: col-resize;"></div>
     <div class="right-pane" style="width: 75%; margin-left: auto;">
