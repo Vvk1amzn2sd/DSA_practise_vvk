@@ -35,10 +35,10 @@
       </select>
       <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
     </div>
-    <div class="code-controls">
-      <button onclick="startTimer()" style="background-color: purple; color: white;">Start</button>
-      <span id="timerDisplay">0 sec</span>
-      <button onclick="submitSolution()" style="background-color: red; color: white;">Submit</button>
+    <div class="code-controls" style="display: flex; gap: 20px;">
+      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 16px;">Start</button>
+      <span id="timerDisplay" style="align-self: center;">0 sec</span>
+      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 16px;">Submit</button>
     </div>
     <div class="theme-toggle">
       <label class="switch">
@@ -53,9 +53,9 @@
     <div class="left-pane" style="width: 25%;">
       <div id="daily-question" class="scrollable-questions">Loading...</div>
     </div>
-    <div class="resizer red"></div>
+    <div class="resizer red" style="cursor: col-resize;"></div>
     <div class="right-pane" style="width: 75%; margin-left: auto;">
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 180px);"></iframe>
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 160px);"></iframe>
     </div>
   </div>
 
