@@ -7,60 +7,87 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="main.js"></script>
+  <style>
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .split-container {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      margin-top: 0;
+    }
+    .left-pane {
+      width: 25%;
+      background: #f0f0f0;
+      overflow-y: auto;
+    }
+    .right-pane {
+      width: 75%;
+    }
+    iframe {
+      height: 100%;
+      width: 100%;
+      border: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="auth-section">
-    <input type="text" id="email" placeholder="Username" maxlength="15" />
-    <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
-    <button onclick="signupUser()">Signup</button>
-    <button onclick="loginUser()">Login</button>
-    <div class="social-login">
-      <button onclick="googleLogin()">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
-      </button>
-      <button disabled>
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
-      </button>
+  <div class="main-container">
+    <div class="auth-section">
+      <input type="text" id="email" placeholder="Username" maxlength="15" />
+      <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
+      <button onclick="signupUser()">Signup</button>
+      <button onclick="loginUser()">Login</button>
+      <div class="social-login">
+        <button onclick="googleLogin()">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
+        </button>
+        <button disabled>
+          <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
+        </button>
+      </div>
     </div>
-  </div>
 
-  <div class="calendar-controls" style="width: calc(100% - 40px); display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; padding-bottom: 10px; border-bottom: 2px solid #e0e0e0;">
-    <div>
-      <label for="datePicker">📅</label>
-      <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
-      <select id="category" onchange="loadQuestionByDate()">
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-      <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
+    <div class="calendar-controls" style="width: calc(100% - 40px); display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #e0e0e0;">
+      <div>
+        <label for="datePicker">📅</label>
+        <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
+        <select id="category" onchange="loadQuestionByDate()">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
+      </div>
+      <div class="code-controls" style="display: flex; gap: 40px; padding: 0 20px;">
+        <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px; margin-left: 10px;">Start</button>
+        <span id="timerDisplay" style="align-self: center; font-weight: bold;">0 sec</span>
+        <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px; margin-right: 10px;">Submit</button>
+      </div>
+      <div class="theme-toggle">
+        <label class="switch">
+          <input type="checkbox" id="themeSwitch" onchange="toggleTheme()">
+          <span class="slider"></span>
+          <span class="icon" id="themeIcon">🌞</span>
+        </label>
+      </div>
     </div>
-    <div class="code-controls" style="display: flex; gap: 40px; padding: 0 20px;">
-      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px; margin-left: 10px;">Start</button>
-      <span id="timerDisplay" style="align-self: center; font-weight: bold;">0 sec</span>
-      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px; margin-right: 10px;">Submit</button>
-    </div>
-    <div class="theme-toggle">
-      <label class="switch">
-        <input type="checkbox" id="themeSwitch" onchange="toggleTheme()">
-        <span class="slider"></span>
-        <span class="icon" id="themeIcon">🌞</span>
-      </label>
-    </div>
-  </div>
 
-  <div class="split-container" style="margin-top: 0;">
-    <div class="left-pane" style="width: 25%;">
-      <div id="daily-question" class="scrollable-questions" style="margin-top: 0; background: #f0f0f0; height: calc(100vh - 170px); border-top: none;">Loading...</div>
+    <div class="split-container">
+      <div class="left-pane">
+        <div id="daily-question">Loading...</div>
+      </div>
+      <div class="right-pane">
+        <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+      </div>
     </div>
-    <div class="resizer red" style="cursor: col-resize;"></div>
-    <div class="right-pane" style="width: 75%; margin-left: auto;">
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 170px); margin-top: 0; border-top: none;"></iframe>
-    </div>
-  </div>
 
-  <div class="footer">
-    made with <3 for Atlas, by VVK.
+    <div class="footer">
+      made with <3 for Atlas, by VVK.
+    </div>
   </div>
 </body>
 </html>
