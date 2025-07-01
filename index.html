@@ -1,59 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DSA Challenge Hub</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="main.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="main-container">
-    <div class="header">DSA GRIND</div>
+    <div class="header">
+      DSA GRIND
+      <div class="vvk-header-signature">vvk</div>
+    </div>
     <div id="dateBannerContainer" class="date-banner">
-      <span id="currentDateDisplay"></span> CHALLENGE IS LIVE TODAY, TRY TO GAIN POSITION
+      <span id="currentDateDisplay"></span> <span id="challengeStatus">Select a date to load challenge</span>
     </div>
 
     <div class="auth-section">
-      <input type="text" id="email" placeholder="Username" maxlength="15" />
-      <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password (min 6)" minlength="6" />
       <button onclick="auth.signupUser()">Signup</button>
       <button onclick="auth.loginUser()">Login</button>
-      <div class="social-login">
-        <button onclick="auth.googleLogin()">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
-        </button>
-        <button disabled>
-          <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
-        </button>
-      </div>
     </div>
 
     <div class="calendar-controls">
       <div class="controls-left">
         <label for="datePicker">📅</label>
-        <input type="date" id="datePicker" onchange="calendar.loadQuestionByDate()" />
-        <select id="category" onchange="calendar.loadQuestionByDate()">
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
+        <input type="date" id="datePicker" />
+        <select id="monthSelect">
+          <option value="JANUARY">January</option>
+          <option value="FEBRUARY">February</option>
+          <option value="MARCH">March</option>
+          <option value="APRIL">April</option>
+          <option value="MAY">May</option>
+          <option value="JUNE" selected>June</option>
+          <option value="JULY">July</option>
+          <option value="AUGUST">August</option>
+          <option value="SEPTEMBER">September</option>
+          <option value="OCTOBER">October</option>
+          <option value="NOVEMBER">November</option>
+          <option value="DECEMBER">December</option>
         </select>
-        <input type="number" id="dayNumber" min="1" value="1" onchange="calendar.loadQuestionByDate()" />
+        <select id="daySelect">
+          <!-- Days will be populated dynamically -->
+        </select>
       </div>
       <div class="code-controls">
         <div class="leaderboard-toggle">
-          <button id="weeklyLeaderboard" class="active" onclick="leaderboard.toggle('weekly')">Weekly</button>
-          <button id="monthlyLeaderboard" onclick="leaderboard.toggle('monthly')">Monthly</button>
-          <span id="leaderboardDisplay" class="vvk-signature">Loading leaders...</span>
+          <button id="weeklyLeaderboard" class="active">Weekly</button>
+          <button id="monthlyLeaderboard">Monthly</button>
+          <span id="leaderboardDisplay">Loading leaders...</span>
         </div>
-        <button class="timer-button start-button" onclick="timer.start()">Start</button>
+        <button class="timer-button start-button">Start</button>
         <span id="timerDisplay">0 sec</span>
-        <button class="timer-button submit-button" onclick="solution.submit()">Submit</button>
+        <button class="timer-button submit-button">Submit</button>
       </div>
       <div class="theme-toggle">
         <label class="switch">
-          <input type="checkbox" id="themeSwitch" onchange="theme.toggle()">
+          <input type="checkbox" id="themeSwitch">
           <span class="slider"></span>
           <span class="icon" id="themeIcon">🌞</span>
         </label>
@@ -73,5 +78,10 @@
       made with ❤️ for Atlas, by <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
     </div>
   </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
