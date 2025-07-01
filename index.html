@@ -35,10 +35,10 @@
       </select>
       <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
     </div>
-    <div class="code-controls" style="display: flex; gap: 20px;">
-      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 16px;">Start</button>
-      <span id="timerDisplay" style="align-self: center;">0 sec</span>
-      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 16px;">Submit</button>
+    <div class="code-controls" style="display: flex; gap: 40px; padding: 0 20px;">
+      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px;">Start</button>
+      <span id="timerDisplay" style="align-self: center; font-weight: bold;">0 sec</span>
+      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px;">Submit</button>
     </div>
     <div class="theme-toggle">
       <label class="switch">
@@ -51,11 +51,11 @@
 
   <div class="split-container">
     <div class="left-pane" style="width: 25%;">
-      <div id="daily-question" class="scrollable-questions">Loading...</div>
+      <div id="daily-question" class="scrollable-questions" style="margin-top: 0;">Loading...</div>
     </div>
     <div class="resizer red" style="cursor: col-resize;"></div>
     <div class="right-pane" style="width: 75%; margin-left: auto;">
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 160px);"></iframe>
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 130px); margin-top: 0;"></iframe>
     </div>
   </div>
 
