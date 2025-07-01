@@ -1,244 +1,76 @@
-/* General styling */
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f9f9fb;
-  color: #333;
-  margin: 0;
-  padding: 0;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSA Challenge Hub</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="main-container">
+    <!-- Top Heading -->
+    <div class="header">DSA GRIND</div>
 
-.footer {
-  text-align: center;
-  margin: 10px 0;
-  font-family: cursive;
-  color: #666;
-  font-style: italic;
-}
-.footer::before {
-  content: "made with ❤️ in purple for Atlas, by ";
-  color: purple;
-}
+    <!-- Top Right Leaderboard Box -->
+    <div class="leaderboard-box">
+      <span class="leaderboard-label">Leaderboard</span>
+      <button id="dailyLeaderboard" class="active">Daily</button>
+      <button id="weeklyLeaderboard">Weekly</button>
+    </div>
 
-.auth-section, .calendar-controls {
-  padding: 10px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin: 10px;
-}
+    <!-- Auth Section -->
+    <div class="auth-section">
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password (min 6)" minlength="6" />
+      <button onclick="auth.signupUser()">Signup</button>
+      <button onclick="auth.loginUser()">Login</button>
+    </div>
 
-input, select, textarea, button {
-  padding: 10px;
-  margin: 5px 0;
-  font-size: 1em;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
+    <!-- Calendar Controls and Timer -->
+    <div class="calendar-controls">
+      <div>
+        <label for="datePicker">📅</label>
+        <input type="date" id="datePicker" />
+        <select id="monthSelect">
+          <option value="JUNE" selected>June</option>
+          <option value="JULY">July</option>
+          <option value="AUGUST">August</option>
+          <!-- Add more months if needed -->
+        </select>
+        <select id="daySelect"></select>
+      </div>
+      <div class="code-controls">
+        <button class="start-btn">Start</button>
+        <span id="timerDisplay">0 sec</span>
+        <button class="submit-btn">Submit</button>
+      </div>
+      <div class="theme-toggle">
+        <label class="switch">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="slider"></span>
+        </label>
+        <span id="themeIcon">🌞</span>
+      </div>
+    </div>
 
-button {
-  background-color: #4CAF50;
-  color: white;
-  cursor: pointer;
-}
+    <!-- Split Area: Questions + IDE -->
+    <div class="split-container">
+      <div class="left-pane">
+        <div id="daily-question" class="scrollable-questions">Select a date to load challenge</div>
+      </div>
+      <div class="resizer red"></div>
+      <div class="right-pane">
+        <iframe id="codeEditor" class="code-iframe" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+      </div>
+    </div>
 
-button:hover {
-  background-color: #45a049;
-}
+    <!-- Footer -->
+    <div class="footer">
+      <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
+    </div>
+  </div>
 
-textarea {
-  width: 100%;
-  font-family: monospace;
-}
-
-.code-controls button {
-  margin: 0 10px;
-  padding: 10px 20px;
-}
-
-.start-btn {
-  background-color: purple;
-}
-
-.submit-btn {
-  background-color: red;
-}
-
-.calendar-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0 10px;
-}
-
-.calendar-controls > div {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.theme-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.leaderboard-label {
-  font-weight: bold;
-}
-
-/* Centered Top Heading */
-.header {
-  text-align: center;
-  font-size: 2rem;
-  color: red;
-  font-family: 'Dancing Script', cursive;
-  padding: 10px 0;
-}
-
-/* Leaderboard button on top right */
-.leaderboard-box {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #f2f2f2;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 5px 10px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  z-index: 999;
-}
-
-.leaderboard-box button {
-  padding: 5px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.leaderboard-box button.active {
-  background-color: #2196F3;
-  color: white;
-}
-
-/* Split layout */
-.split-container {
-  display: flex;
-  height: calc(100vh - 230px);
-  margin: 0 10px;
-  overflow: hidden;
-}
-
-.left-pane {
-  width: 25%;
-  background: #fff;
-  border-right: 2px solid #ccc;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.right-pane {
-  flex: 1;
-  padding: 0;
-  overflow: hidden;
-}
-
-.code-iframe {
-  height: 100%;
-  width: 100%;
-  border: none;
-  margin: 0;
-  display: block;
-}
-
-.resizer.red {
-  width: 5px;
-  background-color: red;
-  cursor: col-resize;
-}
-
-.scrollable-questions {
-  height: 100%;
-  overflow-y: auto;
-  white-space: pre-wrap;
-}
-
-/* Overlay for leaderboard */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.overlay-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 600px;
-  width: 90%;
-  text-align: center;
-}
-
-.close-btn {
-  margin-top: 20px;
-  background-color: #f44336;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 24px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #2196F3;
-}
-
-input:checked + .slider:before {
-  transform: translateX(16px);
-}
+  <script src="main.js"></script>
+</body>
+</html>
