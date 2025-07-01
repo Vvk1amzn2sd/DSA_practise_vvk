@@ -51,23 +51,6 @@
         .catch((err) => alert("❌ " + err.message));
     };
 
-    window.submitCodeAsText = function () {
-      if (!auth.currentUser) return alert("❌ Login first");
-      const code = document.getElementById("userCode").value;
-      if (!code) return alert("❌ Code is empty");
-
-      const email = auth.currentUser.email;
-      const username = email.split("@")[0].substring(0, 5);
-      const date = new Date().toISOString().split("T")[0];
-      const filename = `${username}_${date}.txt`;
-      const storagePath = `submissions/${filename}`;
-
-      const fileRef = sRef(storage, storagePath);
-      uploadString(fileRef, code)
-        .then(() => alert("✅ Code submitted successfully"))
-        .catch((err) => alert("❌ Submission failed: " + err.message));
-    };
-
     window.loadQuestionByDate = function () {
       const selectedDate = document.getElementById("datePicker").value;
       const category = document.getElementById("category").value;
@@ -90,6 +73,21 @@
       document.getElementById("datePicker").value = today;
       loadQuestionByDate();
     };
+
+    window.startTimer = function () {
+      let seconds = 0;
+      const timer = document.getElementById("timerDisplay");
+      clearInterval(window.timerInterval);
+      window.timerInterval = setInterval(() => {
+        seconds++;
+        timer.textContent = `${seconds} sec`;
+      }, 1000);
+    };
+
+    window.submitSolution = function () {
+      clearInterval(window.timerInterval);
+      alert("✅ Solution submitted!");
+    };
   </script>
   <style>
     body {
@@ -111,16 +109,12 @@
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    select, input, textarea, button {
+    select, input, button {
       padding: 10px;
       margin: 5px 0;
       font-size: 1em;
       border-radius: 5px;
       border: 1px solid #ccc;
-    }
-    textarea {
-      width: 100%;
-      font-family: monospace;
     }
     button {
       background-color: #4CAF50;
@@ -132,9 +126,12 @@
     }
     iframe {
       width: 100%;
-      height: 600px;
+      height: 800px;
       border: none;
       margin-top: 10px;
+    }
+    #daily-question {
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -163,10 +160,6 @@
 
       <h2>Code Editor</h2>
       <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
-
-      <h3>Your Code</h3>
-      <textarea id="userCode" rows="10" placeholder="Write your code here..."></textarea>
-      <button onclick="submitCodeAsText()">📤 Submit Code as Text</button>
 
       <div>
         <button onclick="startTimer()">Start</button>
