@@ -11,6 +11,8 @@ const categorySelect = document.getElementById('category');
 const questionPane = document.getElementById('daily-question');
 const timerDisplay = document.getElementById('timerDisplay');
 const currentYear = document.getElementById('currentYear');
+const liveBanner = document.getElementById('liveChallengeBanner');
+const winnerLine = document.getElementById('winnerLine');
 
 let timerInterval;
 let seconds = 0;
@@ -66,6 +68,20 @@ window.loadQuestionByDate = async function () {
     option.textContent = file.name.replace('.txt', '').replace('.md', '');
     problemSelect.appendChild(option);
   });
+
+  // Show live challenge text
+  liveBanner.textContent = `${month} ${day} Challenge is Live!`;
+
+  // Load winner for this date if exists
+  const winnersRef = database.ref(`winners/${month}_${day}`);
+  winnersRef.once('value').then(snapshot => {
+    const data = snapshot.val();
+    if (data && data.username) {
+      winnerLine.textContent = `${data.username} was the winner on ${month} ${day}`;
+    } else {
+      winnerLine.textContent = '';
+    }
+  });
 }
 
 window.loadSelectedProblem = async function () {
@@ -93,43 +109,32 @@ window.submitSolution = function () {
   timerDisplay.textContent = '0 sec';
 
   alert(`Solution submitted! Time: ${timeTaken} sec`);
-  // Store in Firebase
+
   if (currentUser && currentProblem) {
     const ref = database.ref(`submissions/${currentUser.uid}`).push();
-    ref.set({
+    const submission = {
       time: timeTaken,
       problem: currentProblem,
       username: currentUser.email.split('@')[0],
       timestamp: Date.now()
+    };
+    ref.set(submission);
+
+    // Save winner for the day if it's fastest (simplified logic)
+    const selectedDate = new Date(datePicker.value);
+    const month = selectedDate.toLocaleString('default', { month: 'long' }).toUpperCase();
+    const day = selectedDate.getDate();
+    const winnerRef = database.ref(`winners/${month}_${day}`);
+
+    winnerRef.once('value').then(snapshot => {
+      const data = snapshot.val();
+      if (!data || timeTaken < data.time) {
+        winnerRef.set({ username: submission.username, time: timeTaken });
+        winnerLine.textContent = `${submission.username} was the winner on ${month} ${day}`;
+      }
     });
   }
 }
-
-// Resizable logic
-const idePane = document.querySelector('.ide-pane');
-const questionPane = document.querySelector('.question-pane');
-
-let isResizing = false;
-
-questionPane.addEventListener('mousedown', (e) => {
-  if (e.offsetX > questionPane.clientWidth - 10) {
-    isResizing = true;
-    document.body.style.cursor = 'col-resize';
-  }
-});
-
-document.addEventListener('mousemove', (e) => {
-  if (isResizing) {
-    const newWidth = e.clientX;
-    questionPane.style.width = `${newWidth}px`;
-    idePane.style.width = `calc(100% - ${newWidth}px)`;
-  }
-});
-
-document.addEventListener('mouseup', () => {
-  isResizing = false;
-  document.body.style.cursor = 'default';
-});
 
 // Theme toggle
 const themeToggle = document.getElementById('themeSwitch');
