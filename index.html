@@ -4,36 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="main.js"></script>
 </head>
 <body>
   <div class="main-container">
+    <!-- Header -->
     <div class="header">DSA GRIND</div>
 
-    <div class="top-bar">
-      <div class="auth-section">
-        <input type="text" id="username" placeholder="Username" maxlength="15" />
-        <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
-        <button onclick="signupUser()">Signup</button>
-        <button onclick="loginUser()">Login</button>
-        <div class="social-login">
-          <button onclick="googleLogin()">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
-          </button>
-        </div>
-      </div>
+    <!-- Leaderboard Toggle Top Right -->
+    <div class="leaderboard-box">
+      <span class="leaderboard-label">Leaderboard</span>
+      <select id="leaderboardType" onchange="toggleLeaderboard()">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+      <div id="leaderboardDisplay" class="leaderboard-display"></div>
+    </div>
 
-      <div class="leaderboard-header">
-        <select id="leaderboardType" onchange="toggleLeaderboard()">
-          <option value="daily">Daily Leaderboard</option>
-          <option value="weekly">Weekly Leaderboard</option>
-        </select>
-        <div id="leaderboardDisplay" class="leaderboard-display"></div>
+    <!-- Auth Section -->
+    <div class="auth-section">
+      <input type="text" id="username" placeholder="Username" maxlength="15" />
+      <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
+      <button onclick="signupUser()">Signup</button>
+      <button onclick="loginUser()">Login</button>
+      <div class="social-login">
+        <button onclick="googleLogin()">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
+        </button>
       </div>
     </div>
 
+    <!-- Calendar and Timer -->
     <div class="calendar-controls">
       <div class="controls-left">
         <label for="datePicker">📅</label>
@@ -54,22 +57,21 @@
       </div>
     </div>
 
-    <div id="dateBannerContainer" class="date-banner">
-      <span id="currentDateDisplay"></span> CHALLENGE IS LIVE TODAY, TRY TO GAIN POSITION
-    </div>
-
-    <div class="content-container">
-      <div class="question-pane">
-        <div id="daily-question">Select a date to load challenge</div>
+    <!-- Split layout: Left = Question | Right = IDE -->
+    <div class="split-container">
+      <div class="left-pane">
+        <div id="daily-question" class="scrollable-questions">Select a date to load challenge</div>
         <div id="test-results-container"></div>
       </div>
-      <div class="ide-pane">
-        <iframe id="codeEditor" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+      <div class="resizer red"></div>
+      <div class="right-pane">
+        <iframe id="codeEditor" class="code-iframe" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
       </div>
     </div>
 
+    <!-- Footer -->
     <div class="footer">
-      made with ❤️ for Atlas, by <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
+      <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
     </div>
   </div>
 </body>
