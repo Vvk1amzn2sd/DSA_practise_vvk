@@ -42,13 +42,22 @@
     </div>
     <div class="resizer"></div>
     <div class="right-pane">
+      <div class="top-bar">
+        <div class="code-controls">
+          <button onclick="startTimer()">Start</button>
+          <span id="timerDisplay">0 sec</span>
+          <button onclick="submitSolution()">Submit</button>
+        </div>
+        <div class="theme-toggle">
+          <label class="switch">
+            <input type="checkbox" id="themeSwitch" onchange="toggleTheme()">
+            <span class="slider"></span>
+            <span class="icon" id="themeIcon">🌞</span>
+          </label>
+        </div>
+      </div>
       <h2>Code Editor</h2>
       <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
-      <div class="code-controls">
-        <button onclick="startTimer()">Start</button>
-        <span id="timerDisplay">0 sec</span>
-        <button onclick="submitSolution()">Submit</button>
-      </div>
     </div>
   </div>
 
