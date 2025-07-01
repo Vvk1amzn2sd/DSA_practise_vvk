@@ -10,7 +10,20 @@
   <script type="module" src="main.js"></script>
 </head>
 <body>
-  <input type="checkbox" id="themeSwitch" title="Toggle dark mode" />
+  <div class="top-bar">
+    <label class="theme-toggle">
+      <input type="checkbox" id="themeSwitch" title="Toggle dark mode" />
+      <span class="icon">🌗</span>
+    </label>
+    <div class="leaderboard-controls">
+      <select id="leaderboardType" onchange="toggleLeaderboard()">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </div>
+    <div class="attempt-counter">10 attempts today</div>
+  </div>
+
   <div class="main-container">
     <div class="header">DSA GRIND</div>
     <div id="winnerLine">🏆 Yesterday's Winner: <span id="yesterdayWinner">Loading...</span></div>
@@ -33,9 +46,6 @@
       <select id="problemSelect" onchange="loadSelectedProblem()">
         <option value="">Select Problem</option>
       </select>
-      <button class="start-button" onclick="startTimer()">Start</button>
-      <span id="timerDisplay">0 sec</span>
-      <button class="submit-button" onclick="submitSolution()">Submit</button>
     </div>
 
     <div class="content-container">
@@ -43,6 +53,11 @@
         <div id="daily-question">Select a date to load challenge</div>
       </div>
       <div class="ide-pane">
+        <div class="ide-controls">
+          <button class="start-button" onclick="startTimer()" title="Start solving">Start</button>
+          <span id="timerDisplay">0 sec</span>
+          <button class="submit-button" onclick="submitSolution()" title="Submit your solution">Submit</button>
+        </div>
         <iframe id="codeEditor" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
       </div>
     </div>
