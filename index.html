@@ -68,27 +68,61 @@
         .catch((err) => alert("❌ Submission failed: " + err.message));
     };
 
-    window.loadQuestionByDate = function () {
+    window.loadQuestionByDate = async function () {
       const selectedDate = document.getElementById("datePicker").value;
       const category = document.getElementById("category").value;
-      const dayNum = document.getElementById("dayNumber").value || 1;
+      const questionNumberDropdown = document.getElementById("dayNumber");
+
       if (!selectedDate) return;
+
       const dateObj = new Date(selectedDate);
       const day = dateObj.getDate();
       const month = dateObj.toLocaleString("default", { month: "short" }).toUpperCase();
-      const filename = `JUL${dayNum}.txt`;
-      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/questions/${category}/${filename}`;
 
+      // Try each file until one is not found
+      let found = false;
+      let i = 1;
+      questionNumberDropdown.innerHTML = "";
+      while (true) {
+        const filename = `${day}_${month}${i}.txt`;
+        const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
+        try {
+          const res = await fetch(url);
+          if (!res.ok) break;
+          const text = await res.text();
+          if (i == 1) document.getElementById("daily-question").textContent = text;
+          const option = document.createElement("option");
+          option.value = i;
+          option.textContent = `Question ${i}`;
+          questionNumberDropdown.appendChild(option);
+          found = true;
+          i++;
+        } catch (e) {
+          break;
+        }
+      }
+      if (!found) document.getElementById("daily-question").textContent = "❌ No questions found.";
+    };
+
+    document.getElementById("dayNumber").addEventListener("change", () => {
+      const selectedDate = document.getElementById("datePicker").value;
+      const category = document.getElementById("category").value;
+      const i = document.getElementById("dayNumber").value;
+      const dateObj = new Date(selectedDate);
+      const day = dateObj.getDate();
+      const month = dateObj.toLocaleString("default", { month: "short" }).toUpperCase();
+      const filename = `${day}_${month}${i}.txt`;
+      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
       fetch(url)
         .then(res => res.ok ? res.text() : Promise.reject("❌ Question not found."))
         .then(text => document.getElementById("daily-question").textContent = text)
         .catch(err => document.getElementById("daily-question").textContent = err);
-    };
+    });
 
     window.onload = () => {
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("datePicker").value = today;
-      loadQuestionByDate();
+      window.loadQuestionByDate();
     };
   </script>
   <style>
@@ -101,17 +135,17 @@
     }
     .container {
       display: grid;
-      grid-template-columns: 1fr 3fr 1fr;
+      grid-template-columns: 3fr 1fr;
       gap: 10px;
       padding: 10px;
     }
-    .auth-section, .calendar-controls, .editor-section, .leaderboard-section {
+    .calendar-controls, .editor-section, .leaderboard-section {
       padding: 15px;
       background: white;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    input, select, textarea, button {
+    select, input, textarea, button {
       padding: 10px;
       margin: 5px 0;
       font-size: 1em;
@@ -130,107 +164,50 @@
     button:hover {
       background-color: #45a049;
     }
-    h2, h3 {
-      margin-top: 0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-    th, td {
-      padding: 8px;
-      text-align: center;
-    }
     iframe {
       width: 100%;
       height: 600px;
       border: none;
       margin-top: 10px;
     }
-    #chart-container {
-      margin-top: 20px;
-    }
-    .social-login {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .social-login button {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .footer {
-      text-align: center;
-      margin: 20px 0;
-      font-family: cursive;
-      color: #666;
-    }
   </style>
 </head>
 <body>
- <div class="auth-section">
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
-  <button onclick="signupUser()">Signup</button>
-  <button onclick="loginUser()">Login</button>
-  <div class="social-login">
-    <button onclick="googleLogin()">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
-    </button>
-    <button disabled>
-      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
-    </button>
-  </div>
-</div>
-
-<div class="calendar-controls">
-  <label for="datePicker">📅</label>
-  <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
-  <select id="category" onchange="loadQuestionByDate()">
-    <option value="easy">Easy</option>
-    <option value="medium">Medium</option>
-    <option value="hard">Hard</option>
-  </select>
-  <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
-</div>
-
-<div class="container">
-  <div class="leaderboard-section">
-    <h3>Weekly Leaderboard</h3>
-    <div id="weekly-chart-container"><canvas id="weeklyChart"></canvas></div>
-    <h3>Monthly Leaderboard</h3>
-    <div id="monthly-chart-container"><canvas id="monthlyChart"></canvas></div>
+  <div class="calendar-controls">
+    <input type="date" id="datePicker" onchange="loadQuestionByDate()">
+    <select id="category" onchange="loadQuestionByDate()">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+    <select id="dayNumber"></select>
   </div>
 
-  <div class="editor-section">
-    <h2>Challenge</h2>
-    <pre id="daily-question">Loading...</pre>
+  <div class="container">
+    <div class="leaderboard-section">
+      <h3>Weekly Leaderboard</h3>
+      <div id="weekly-chart-container"><canvas id="weeklyChart"></canvas></div>
+      <h3>Monthly Leaderboard</h3>
+      <div id="monthly-chart-container"><canvas id="monthlyChart"></canvas></div>
+    </div>
 
-    <h2>Code Editor</h2>
-    <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+    <div class="editor-section">
+      <h2>Challenge</h2>
+      <pre id="daily-question">Loading...</pre>
 
-    <h3>Your Code</h3>
-    <textarea id="userCode" rows="10" placeholder="Write your code here..."></textarea>
-    <button onclick="submitCodeAsText()">📤 Submit Code as Text</button>
+      <h2>Code Editor</h2>
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
 
-    <div>
-      <button onclick="startTimer()">Start</button>
-      <span id="timerDisplay">0 sec</span>
-      <button onclick="submitSolution()">Submit</button>
+      <h3>Your Code</h3>
+      <textarea id="userCode" rows="10" placeholder="Write your code here..."></textarea>
+      <button onclick="submitCodeAsText()">📤 Submit Code as Text</button>
+
+      <div>
+        <button onclick="startTimer()">Start</button>
+        <span id="timerDisplay">0 sec</span>
+        <button onclick="submitSolution()">Submit</button>
+      </div>
     </div>
   </div>
-</div>
-
-<div class="footer">
-  made with <3 for Atlas, by VVK.
-</div>
-
 </body>
 </html>
