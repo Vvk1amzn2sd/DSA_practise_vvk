@@ -4,75 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="styles.css">
   <script type="module" src="main.js"></script>
 </head>
 <body>
   <div class="main-container">
-    <!-- Header -->
-    <div class="header">DSA GRIND</div>
-
-    <!-- Leaderboard Toggle Top Right -->
-    <div class="leaderboard-box">
-      <span class="leaderboard-label">Leaderboard</span>
-      <select id="leaderboardType" onchange="toggleLeaderboard()">
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-      </select>
-      <div id="leaderboardDisplay" class="leaderboard-display"></div>
-    </div>
-
-    <!-- Auth Section -->
-    <div class="auth-section">
-      <input type="text" id="username" placeholder="Username" maxlength="15" />
-      <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
-      <button onclick="signupUser()">Signup</button>
-      <button onclick="loginUser()">Login</button>
-      <div class="social-login">
-        <button onclick="googleLogin()">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
-        </button>
+    <header class="header">
+      <div class="title-banner">
+        <div id="darkToggle">🌗</div>
+        <h1 class="main-heading">DSA GRIND</h1>
+        <div id="dailyWinner" class="daily-winner-banner"></div>
       </div>
-    </div>
+    </header>
 
-    <!-- Calendar and Timer -->
-    <div class="calendar-controls">
-      <div class="controls-left">
-        <label for="datePicker">📅</label>
-        <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
-        <select id="problemSelect" onchange="loadSelectedProblem()">
-          <option value="">Select Problem</option>
-        </select>
-        <select id="category" onchange="loadQuestionByDate()">
+    <div class="top-bar">
+      <div class="auth-section">
+        <input type="text" id="username" placeholder="Username" maxlength="15" />
+        <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
+        <button onclick="signupUser()">Signup</button>
+        <button onclick="loginUser()">Login</button>
+      </div>
+
+      <div class="calendar-controls">
+        <input type="date" id="datePicker" />
+        <select id="category">
           <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
+          <option value="medium" selected>Medium</option>
           <option value="hard">Hard</option>
         </select>
+        <select id="problemSelect">
+          <option value="">Select Problem</option>
+        </select>
       </div>
-      <div class="timer-controls">
-        <button class="timer-button start-button" onclick="startTimer()">Start</button>
-        <span id="timerDisplay">0 sec</span>
-        <button class="timer-button submit-button" onclick="submitSolution()">Submit</button>
+
+      <div class="leaderboard-bar">
+        <select id="leaderboardType" onchange="toggleLeaderboard()">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+        </select>
+        <div id="leaderboardDisplay" class="leaderboard-display">Leaderboard...</div>
       </div>
     </div>
 
-    <!-- Split layout: Left = Question | Right = IDE -->
-    <div class="split-container">
-      <div class="left-pane">
-        <div id="daily-question" class="scrollable-questions">Select a date to load challenge</div>
-        <div id="test-results-container"></div>
+    <div class="content-section">
+      <div class="question-pane">
+        <div id="daily-question">Choose a date and problem</div>
       </div>
-      <div class="resizer red"></div>
-      <div class="right-pane">
-        <iframe id="codeEditor" class="code-iframe" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+
+      <div class="ide-pane">
+        <div class="controls">
+          <button class="start-button" onclick="startTimer()">Start</button>
+          <span id="timerDisplay">0 sec</span>
+          <button class="submit-button" onclick="submitSolution()">Submit</button>
+        </div>
+        <iframe id="codeEditor" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
       </div>
     </div>
 
-    <!-- Footer -->
-    <div class="footer">
-      <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
-    </div>
+    <footer class="footer">
+      made with <span style="color:purple">❤️</span> for Atlas, by <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
+    </footer>
   </div>
 </body>
 </html>
