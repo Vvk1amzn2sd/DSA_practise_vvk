@@ -1,107 +1,66 @@
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f9f9fb;
-  color: #333;
-  margin: 0;
-  padding: 0;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSA Challenge Hub</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="main.js"></script>
+</head>
+<body>
+  <div class="auth-section">
+    <input type="text" id="email" placeholder="Username" maxlength="15" />
+    <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
+    <button onclick="signupUser()">Signup</button>
+    <button onclick="loginUser()">Login</button>
+    <div class="social-login">
+      <button onclick="googleLogin()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
+      </button>
+      <button disabled>
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
+      </button>
+    </div>
+  </div>
 
-.container {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 10px;
-  padding: 10px;
-}
+  <div class="calendar-controls" style="width: calc(100% - 40px); display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <label for="datePicker">📅</label>
+      <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
+      <select id="category" onchange="loadQuestionByDate()">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+      <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
+    </div>
+    <div class="code-controls" style="display: flex; gap: 40px; padding: 0 20px;">
+      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px; margin-left: 10px;">Start</button>
+      <span id="timerDisplay" style="align-self: center; font-weight: bold;">0 sec</span>
+      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px; margin-right: 10px;">Submit</button>
+    </div>
+    <div class="theme-toggle">
+      <label class="switch">
+        <input type="checkbox" id="themeSwitch" onchange="toggleTheme()">
+        <span class="slider"></span>
+        <span class="icon" id="themeIcon">🌞</span>
+      </label>
+    </div>
+  </div>
 
-.auth-section,
-.calendar-controls,
-.editor-section,
-.leaderboard-section {
-  padding: 15px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin: 10px;
-}
+  <div class="split-container">
+    <div class="left-pane" style="width: 25%;">
+      <div id="daily-question" class="scrollable-questions" style="margin-top: 0; background: #f0f0f0; height: calc(100vh - 170px);">Loading...</div>
+    </div>
+    <div class="resizer red" style="cursor: col-resize;"></div>
+    <div class="right-pane" style="width: 75%; margin-left: auto;">
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 170px); margin-top: 0;"></iframe>
+    </div>
+  </div>
 
-input,
-select,
-button {
-  padding: 10px;
-  margin: 5px 0;
-  font-size: 1em;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-button {
-  background-color: #4caf50;
-  color: white;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-h2,
-h3 {
-  margin-top: 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-table,
-th,
-td {
-  border: 1px solid #ccc;
-}
-
-th,
-td {
-  padding: 8px;
-  text-align: center;
-}
-
-iframe {
-  width: 100%;
-  height: 600px;
-  border: none;
-  margin-top: 10px;
-}
-
-#chart-container {
-  margin-top: 20px;
-}
-
-.social-login {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.social-login button {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.footer {
-  text-align: center;
-  margin: 20px 0;
-  font-family: cursive;
-  color: #666;
-}
-
-.code-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-}
+  <div class="footer">
+    made with <3 for Atlas, by VVK.
+  </div>
+</body>
+</html>
