@@ -24,7 +24,7 @@
     </div>
   </div>
 
-  <div class="calendar-controls" style="width: calc(100% - 40px); display: flex; justify-content: space-between; align-items: center;">
+  <div class="calendar-controls" style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; padding: 10px;">
     <div>
       <label for="datePicker">📅</label>
       <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
@@ -36,9 +36,9 @@
       <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
     </div>
     <div class="code-controls" style="display: flex; gap: 40px; padding: 0 20px;">
-      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px; margin-left: 10px;">Start</button>
+      <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px;">Start</button>
       <span id="timerDisplay" style="align-self: center; font-weight: bold;">0 sec</span>
-      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px; margin-right: 10px;">Submit</button>
+      <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px;">Submit</button>
     </div>
     <div class="theme-toggle">
       <label class="switch">
@@ -49,13 +49,13 @@
     </div>
   </div>
 
-  <div class="split-container">
+  <div class="split-container" style="margin-top: 0;">
     <div class="left-pane" style="width: 25%;">
-      <div id="daily-question" class="scrollable-questions" style="margin-top: 0; background: #f0f0f0; height: calc(100vh - 170px);">Loading...</div>
+      <div id="daily-question" class="scrollable-questions" style="background: #f0f0f0; height: calc(100vh - 210px);">Loading...</div>
     </div>
     <div class="resizer red" style="cursor: col-resize;"></div>
     <div class="right-pane" style="width: 75%; margin-left: auto;">
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 170px); margin-top: 0;"></iframe>
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 210px); margin-top: 0px; display: block; width: 100%;"></iframe>
     </div>
   </div>
 
