@@ -24,19 +24,21 @@
     </div>
   </div>
 
-  <div class="calendar-controls">
-    <label for="datePicker">📅</label>
-    <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
-    <select id="category" onchange="loadQuestionByDate()">
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-    <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
+  <div class="calendar-controls" style="width: calc(100% - 40px); display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <label for="datePicker">📅</label>
+      <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
+      <select id="category" onchange="loadQuestionByDate()">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+      <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
+    </div>
     <div class="code-controls">
-      <button onclick="startTimer()">Start</button>
+      <button onclick="startTimer()" style="background-color: purple; color: white;">Start</button>
       <span id="timerDisplay">0 sec</span>
-      <button onclick="submitSolution()">Submit</button>
+      <button onclick="submitSolution()" style="background-color: red; color: white;">Submit</button>
     </div>
     <div class="theme-toggle">
       <label class="switch">
@@ -53,7 +55,7 @@
     </div>
     <div class="resizer red"></div>
     <div class="right-pane" style="width: 75%; margin-left: auto;">
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 220px);"></iframe>
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 180px);"></iframe>
     </div>
   </div>
 
