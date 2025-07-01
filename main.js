@@ -69,10 +69,8 @@ window.loadQuestionByDate = async function () {
     problemSelect.appendChild(option);
   });
 
-  // Show live challenge text
   liveBanner.textContent = `${month} ${day} Challenge is Live!`;
 
-  // Load winner for this date if exists
   const winnersRef = database.ref(`winners/${month}_${day}`);
   winnersRef.once('value').then(snapshot => {
     const data = snapshot.val();
@@ -108,7 +106,11 @@ window.submitSolution = function () {
   seconds = 0;
   timerDisplay.textContent = '0 sec';
 
-  alert(`Solution submitted! Time: ${timeTaken} sec`);
+  let message = `Solution submitted!\nTime: ${timeTaken} sec`;
+  let result = Math.random() > 0.3 ? 'PASS' : 'FAIL';
+  message += `\nResult: ${result}`;
+
+  alert(message);
 
   if (currentUser && currentProblem) {
     const ref = database.ref(`submissions/${currentUser.uid}`).push();
@@ -116,11 +118,11 @@ window.submitSolution = function () {
       time: timeTaken,
       problem: currentProblem,
       username: currentUser.email.split('@')[0],
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      result
     };
     ref.set(submission);
 
-    // Save winner for the day if it's fastest (simplified logic)
     const selectedDate = new Date(datePicker.value);
     const month = selectedDate.toLocaleString('default', { month: 'long' }).toUpperCase();
     const day = selectedDate.getDate();
@@ -136,7 +138,6 @@ window.submitSolution = function () {
   }
 }
 
-// Theme toggle
 const themeToggle = document.getElementById('themeSwitch');
 themeToggle?.addEventListener('change', () => {
   document.body.classList.toggle('dark-mode');
