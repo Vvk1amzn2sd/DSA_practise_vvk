@@ -4,140 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getStorage, ref as sRef, uploadString } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
-      authDomain: "dsa-challenge.firebaseapp.com",
-      databaseURL: "https://dsa-challenge-default-rtdb.asia-southeast1.firebasedatabase.app/",
-      projectId: "dsa-challenge",
-      storageBucket: "dsa-challenge.appspot.com",
-      messagingSenderId: "866070092409",
-      appId: "1:866070092409:web:49faada850b1b91bbf52a8"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const storage = getStorage(app);
-    const provider = new GoogleAuthProvider();
-
-    window.signupUser = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      if (!email || !password) return alert("❌ Email and password required.");
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => alert("✅ Signup successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
-
-    window.loginUser = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      if (!email || !password) return alert("❌ Email and password required.");
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => alert("✅ Login successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
-
-    window.googleLogin = function () {
-      signInWithPopup(auth, provider)
-        .then(() => alert("✅ Google login successful!"))
-        .catch((err) => alert("❌ " + err.message));
-    };
-
-    window.loadQuestionByDate = function () {
-      const selectedDate = document.getElementById("datePicker").value;
-      const category = document.getElementById("category").value;
-      const dayNum = document.getElementById("dayNumber").value || 1;
-      if (!selectedDate) return;
-      const dateObj = new Date(selectedDate);
-      const day = dateObj.getDate();
-      const month = dateObj.toLocaleString("default", { month: "short" }).toUpperCase();
-      const filename = `${day}_${month}${dayNum}.txt`;
-      const url = `https://raw.githubusercontent.com/Vvk1amzn2sd/DSA_practise_vvk/main/Questions/${category}/${filename}`;
-
-      fetch(url)
-        .then(res => res.ok ? res.text() : Promise.reject("❌ Question not found."))
-        .then(text => document.getElementById("daily-question").textContent = text)
-        .catch(err => document.getElementById("daily-question").textContent = err);
-    };
-
-    window.onload = () => {
-      const today = new Date().toISOString().split("T")[0];
-      document.getElementById("datePicker").value = today;
-      loadQuestionByDate();
-    };
-
-    window.startTimer = function () {
-      let seconds = 0;
-      const timer = document.getElementById("timerDisplay");
-      clearInterval(window.timerInterval);
-      window.timerInterval = setInterval(() => {
-        seconds++;
-        timer.textContent = `${seconds} sec`;
-      }, 1000);
-    };
-
-    window.submitSolution = function () {
-      clearInterval(window.timerInterval);
-      alert("✅ Solution submitted!");
-    };
-  </script>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f9f9fb;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      display: grid;
-      grid-template-columns: 1fr 3fr 1fr;
-      gap: 10px;
-      padding: 10px;
-    }
-    .calendar-controls, .editor-section, .leaderboard-section {
-      padding: 15px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    select, input, button {
-      padding: 10px;
-      margin: 5px 0;
-      font-size: 1em;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    iframe {
-      width: 100%;
-      height: 800px;
-      border: none;
-      margin-top: 10px;
-    }
-    #daily-question {
-      white-space: pre-wrap;
-    }
-  </style>
+  <script type="module" src="main.js"></script>
 </head>
 <body>
+  <div class="auth-section">
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="signupUser()">Signup</button>
+    <button onclick="loginUser()">Login</button>
+    <div class="social-login">
+      <button onclick="googleLogin()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
+      </button>
+      <button disabled>
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="18"> GitHub
+      </button>
+    </div>
+  </div>
+
   <div class="calendar-controls">
-    <input type="date" id="datePicker" onchange="loadQuestionByDate()">
+    <label for="datePicker">📅</label>
+    <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
     <select id="category" onchange="loadQuestionByDate()">
       <option value="easy">Easy</option>
       <option value="medium">Medium</option>
@@ -147,13 +36,6 @@
   </div>
 
   <div class="container">
-    <div class="leaderboard-section">
-      <h3>Weekly Leaderboard</h3>
-      <div id="weekly-chart-container"><canvas id="weeklyChart"></canvas></div>
-      <h3>Monthly Leaderboard</h3>
-      <div id="monthly-chart-container"><canvas id="monthlyChart"></canvas></div>
-    </div>
-
     <div class="editor-section">
       <h2>Challenge</h2>
       <pre id="daily-question">Loading...</pre>
@@ -161,12 +43,23 @@
       <h2>Code Editor</h2>
       <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
 
-      <div>
+      <div class="code-controls">
         <button onclick="startTimer()">Start</button>
         <span id="timerDisplay">0 sec</span>
         <button onclick="submitSolution()">Submit</button>
       </div>
     </div>
+
+    <div class="leaderboard-section">
+      <h3>Weekly Leaderboard</h3>
+      <div id="weekly-chart-container"><canvas id="weeklyChart"></canvas></div>
+      <h3>Monthly Leaderboard</h3>
+      <div id="monthly-chart-container"><canvas id="monthlyChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    made with <3 for Atlas, by VVK.
   </div>
 </body>
 </html>
