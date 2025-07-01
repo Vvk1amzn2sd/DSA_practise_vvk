@@ -6,43 +6,22 @@
   <title>DSA Challenge Hub</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="main.js"></script>
-  <style>
-    .main-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    .split-container {
-      display: flex;
-      flex: 1;
-      width: 100%;
-      margin-top: 0;
-    }
-    .left-pane {
-      width: 25%;
-      background: #f0f0f0;
-      overflow-y: auto;
-    }
-    .right-pane {
-      width: 75%;
-    }
-    iframe {
-      height: 100%;
-      width: 100%;
-      border: none;
-    }
-  </style>
+  <script src="main.js" defer></script>
 </head>
 <body>
   <div class="main-container">
+    <div class="header">DSA GRIND</div>
+    <div id="dateBannerContainer" class="date-banner">
+      <span id="currentDateDisplay"></span> CHALLENGE IS LIVE TODAY, TRY TO GAIN POSITION
+    </div>
+
     <div class="auth-section">
       <input type="text" id="email" placeholder="Username" maxlength="15" />
       <input type="password" id="password" placeholder="Password (max 6)" maxlength="6" />
-      <button onclick="signupUser()">Signup</button>
-      <button onclick="loginUser()">Login</button>
+      <button onclick="auth.signupUser()">Signup</button>
+      <button onclick="auth.loginUser()">Login</button>
       <div class="social-login">
-        <button onclick="googleLogin()">
+        <button onclick="auth.googleLogin()">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Google
         </button>
         <button disabled>
@@ -51,25 +30,30 @@
       </div>
     </div>
 
-    <div class="calendar-controls" style="width: calc(100% - 40px); display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #e0e0e0;">
-      <div>
+    <div class="calendar-controls">
+      <div class="controls-left">
         <label for="datePicker">📅</label>
-        <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
-        <select id="category" onchange="loadQuestionByDate()">
+        <input type="date" id="datePicker" onchange="calendar.loadQuestionByDate()" />
+        <select id="category" onchange="calendar.loadQuestionByDate()">
           <option value="easy">Easy</option>
           <option value="medium">Medium</option>
           <option value="hard">Hard</option>
         </select>
-        <input type="number" id="dayNumber" min="1" value="1" onchange="loadQuestionByDate()" />
+        <input type="number" id="dayNumber" min="1" value="1" onchange="calendar.loadQuestionByDate()" />
       </div>
-      <div class="code-controls" style="display: flex; gap: 40px; padding: 0 20px;">
-        <button onclick="startTimer()" style="background-color: purple; color: white; padding: 8px 20px; margin-left: 10px;">Start</button>
-        <span id="timerDisplay" style="align-self: center; font-weight: bold;">0 sec</span>
-        <button onclick="submitSolution()" style="background-color: red; color: white; padding: 8px 20px; margin-right: 10px;">Submit</button>
+      <div class="code-controls">
+        <div class="leaderboard-toggle">
+          <button id="weeklyLeaderboard" class="active" onclick="leaderboard.toggle('weekly')">Weekly</button>
+          <button id="monthlyLeaderboard" onclick="leaderboard.toggle('monthly')">Monthly</button>
+          <span id="leaderboardDisplay" class="vvk-signature">Loading leaders...</span>
+        </div>
+        <button class="timer-button start-button" onclick="timer.start()">Start</button>
+        <span id="timerDisplay">0 sec</span>
+        <button class="timer-button submit-button" onclick="solution.submit()">Submit</button>
       </div>
       <div class="theme-toggle">
         <label class="switch">
-          <input type="checkbox" id="themeSwitch" onchange="toggleTheme()">
+          <input type="checkbox" id="themeSwitch" onchange="theme.toggle()">
           <span class="slider"></span>
           <span class="icon" id="themeIcon">🌞</span>
         </label>
@@ -78,15 +62,15 @@
 
     <div class="split-container">
       <div class="left-pane">
-        <div id="daily-question">Loading...</div>
+        <div id="daily-question">Select a date to load challenge</div>
       </div>
       <div class="right-pane">
-        <iframe src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+        <iframe id="codeEditor" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
       </div>
     </div>
 
     <div class="footer">
-      made with <3 for Atlas, by VVK.
+      made with ❤️ for Atlas, by <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
     </div>
   </div>
 </body>
