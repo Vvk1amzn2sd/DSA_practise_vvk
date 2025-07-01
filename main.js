@@ -1,23 +1,6 @@
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getDatabase,
-  ref,
-  set
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import {
-  getStorage,
-  ref as sRef,
-  uploadString
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBxmE8mAJJ5pFkOWC00ct_pWK1Autr2PAo",
@@ -32,7 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
 const provider = new GoogleAuthProvider();
 
 window.signupUser = function () {
@@ -41,7 +23,7 @@ window.signupUser = function () {
   if (!email || !password) return alert("❌ Email and password required.");
   createUserWithEmailAndPassword(auth, email, password)
     .then(() => alert("✅ Signup successful!"))
-    .catch((err) => alert("❌ " + err.message));
+    .catch(err => alert("❌ " + err.message));
 };
 
 window.loginUser = function () {
@@ -50,13 +32,13 @@ window.loginUser = function () {
   if (!email || !password) return alert("❌ Email and password required.");
   signInWithEmailAndPassword(auth, email, password)
     .then(() => alert("✅ Login successful!"))
-    .catch((err) => alert("❌ " + err.message));
+    .catch(err => alert("❌ " + err.message));
 };
 
 window.googleLogin = function () {
   signInWithPopup(auth, provider)
     .then(() => alert("✅ Google login successful!"))
-    .catch((err) => alert("❌ " + err.message));
+    .catch(err => alert("❌ " + err.message));
 };
 
 let timerInterval = null;
@@ -92,8 +74,11 @@ window.submitSolution = function () {
   };
 
   set(ref(db, `leaderboard/${date}/${category}/${emailKey}`), entry)
-    .then(() => alert("✅ Submitted to leaderboard!"))
-    .catch((err) => alert("❌ " + err.message));
+    .then(() => {
+      alert("✅ Submitted to leaderboard!");
+      loadLeaderboard("daily");
+    })
+    .catch(err => alert("❌ " + err.message));
 };
 
 window.loadQuestionByDate = function () {
@@ -112,8 +97,64 @@ window.loadQuestionByDate = function () {
     .catch(err => document.getElementById("daily-question").textContent = err);
 };
 
+window.toggleLeaderboardView = function () {
+  const isWeekly = document.getElementById("toggleLeaderboard").checked;
+  document.getElementById("leaderboardLabel").textContent = isWeekly ? "Weekly Leaderboard" : "Daily Leaderboard";
+  loadLeaderboard(isWeekly ? "weekly" : "daily");
+};
+
+function loadLeaderboard(view) {
+  const today = new Date();
+  const oneDay = 86400000;
+  const dates = [];
+
+  if (view === "daily") {
+    dates.push(today.toISOString().split("T")[0]);
+  } else {
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today - i * oneDay).toISOString().split("T")[0];
+      dates.push(d);
+    }
+  }
+
+  const category = document.getElementById("category").value;
+  const allEntries = {};
+
+  Promise.all(dates.map(date =>
+    get(child(ref(db), `leaderboard/${date}/${category}`)).then(snapshot => {
+      if (snapshot.exists()) {
+        Object.entries(snapshot.val()).forEach(([key, val]) => {
+          const email = val.email;
+          const time = parseFloat(val.time);
+          if (!allEntries[email]) allEntries[email] = [];
+          allEntries[email].push(time);
+        });
+      }
+    })
+  )).then(() => {
+    const averaged = Object.entries(allEntries).map(([email, times]) => {
+      const avg = (times.reduce((a, b) => a + b, 0) / times.length).toFixed(2);
+      return { email, avg };
+    });
+
+    averaged.sort((a, b) => parseFloat(a.avg) - parseFloat(b.avg));
+
+    const tbody = document.getElementById("leaderboardBody");
+    tbody.innerHTML = "";
+    averaged.forEach((entry, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${entry.email}</td>
+        <td>#${idx + 1} (${entry.avg} min)</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
 window.onload = () => {
   const today = new Date().toISOString().split("T")[0];
   document.getElementById("datePicker").value = today;
   loadQuestionByDate();
+  loadLeaderboard("daily");
 };
