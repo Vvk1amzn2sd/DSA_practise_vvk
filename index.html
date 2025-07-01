@@ -24,7 +24,7 @@
     </div>
   </div>
 
-  <div class="calendar-controls" style="width: calc(100% - 40px); display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 2px solid #e0e0e0;">
+  <div class="calendar-controls" style="width: calc(100% - 40px); display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; padding-bottom: 10px; border-bottom: 2px solid #e0e0e0;">
     <div>
       <label for="datePicker">📅</label>
       <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
@@ -51,11 +51,11 @@
 
   <div class="split-container" style="margin-top: 0;">
     <div class="left-pane" style="width: 25%;">
-      <div id="daily-question" class="scrollable-questions" style="margin-top: 0; background: #f0f0f0; height: calc(100vh - 180px);">Loading...</div>
+      <div id="daily-question" class="scrollable-questions" style="margin-top: 0; background: #f0f0f0; height: calc(100vh - 170px); border-top: none;">Loading...</div>
     </div>
     <div class="resizer red" style="cursor: col-resize;"></div>
     <div class="right-pane" style="width: 75%; margin-left: auto;">
-      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 180px); margin-top: 0;"></iframe>
+      <iframe src="https://onecompiler.com/embed/java" allowfullscreen style="height: calc(100vh - 170px); margin-top: 0; border-top: none;"></iframe>
     </div>
   </div>
 
