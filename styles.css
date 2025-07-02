@@ -14,7 +14,7 @@ body {
   font-size: 22px;
   font-family: 'Dancing Script', cursive;
   color: darkred;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 #winnerLine, #liveChallengeBanner {
@@ -24,13 +24,15 @@ body {
 }
 
 .auth-section {
+  position: absolute;
+  top: 38px;
+  left: 12px;
   display: flex;
-  justify-content: center;
   gap: 6px;
-  margin: 6px 0;
   background-color: #e0ffe0;
   padding: 6px;
   border-radius: 6px;
+  z-index: 100;
 }
 
 .auth-section input {
@@ -49,13 +51,13 @@ body {
   display: flex;
   justify-content: flex-start;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   padding-left: 8px;
 }
 
 .content-container {
   display: flex;
-  height: calc(100vh - 220px);
+  height: calc(100vh - 210px);
 }
 
 .question-pane {
@@ -110,6 +112,15 @@ body {
   height: 100%;
 }
 
+#attemptCountDisplay {
+  font-size: 13px;
+  font-style: italic;
+  color: #555;
+  text-align: right;
+  padding-right: 12px;
+  margin-top: 4px;
+}
+
 .footer {
   text-align: center;
   font-family: 'Dancing Script', cursive;
@@ -119,4 +130,23 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
+}
+
+.leaderboard-toggle {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+}
+
+.leaderboard-toggle button {
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.leaderboard-toggle button.active {
+  background-color: #6200ea;
+  color: white;
 }
