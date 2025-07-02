@@ -9,14 +9,40 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
   <script type="module" src="main.js"></script>
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    .main-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .content-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .question-pane {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background: #fafafa;
+      border-right: 1px solid #ccc;
+    }
+    .ide-pane {
+      flex: 2;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
     #monacoEditor {
       width: 100%;
-      height: 75vh;
+      height: 50vh;
       border: 1px solid #ccc;
-    }
-    #languageSelect {
-      margin: 10px 0;
-      padding: 6px;
     }
     #stdinInput {
       width: 100%;
@@ -28,6 +54,20 @@
       padding: 10px;
       margin-top: 10px;
       white-space: pre-wrap;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .language-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #6a1b9a;
+      color: white;
+      padding: 8px 12px;
+      margin-top: 10px;
+    }
+    .language-header select {
+      padding: 4px;
     }
   </style>
 </head>
@@ -71,24 +111,30 @@
           <span id="timerDisplay">0 sec</span>
           <button class="submit-button" onclick="submitSolution()">Submit</button>
         </div>
-        <select id="languageSelect">
-          <option value="java">Java</option>
-          <option value="c">C</option>
-          <option value="cpp">C++</option>
-          <option value="python">Python</option>
-          <option value="javascript">JavaScript</option>
-          <option value="typescript">TypeScript</option>
-          <option value="ruby">Ruby</option>
-          <option value="csharp">C#</option>
-          <option value="go">Go</option>
-          <option value="php">PHP</option>
-          <option value="swift">Swift</option>
-          <option value="rust">Rust</option>
-          <option value="sql">SQL</option>
-          <option value="assembly">Assembly</option>
-        </select>
+
+        <div class="language-header">
+          <span>🟪 Java</span>
+          <select id="languageSelect">
+            <option value="java">Java</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="typescript">TypeScript</option>
+            <option value="ruby">Ruby</option>
+            <option value="csharp">C#</option>
+            <option value="go">Go</option>
+            <option value="php">PHP</option>
+            <option value="swift">Swift</option>
+            <option value="rust">Rust</option>
+            <option value="sql">SQL</option>
+            <option value="assembly">Assembly</option>
+          </select>
+        </div>
+
         <div id="attemptCountDisplay">0 attempts today</div>
         <div id="winnerBanner"></div>
+
         <div id="monacoEditor"></div>
         <textarea id="stdinInput" rows="3" placeholder="Custom Input (stdin)"></textarea>
         <button onclick="runCode()">▶️ Run</button>
