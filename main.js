@@ -1,6 +1,5 @@
 // main.js
 
-// Firebase config is imported from firebase.js
 import { firebaseApp, database, auth } from './firebase.js';
 
 const usernameInput = document.getElementById('username');
@@ -14,12 +13,12 @@ const currentYear = document.getElementById('currentYear');
 const liveBanner = document.getElementById('liveChallengeBanner');
 const winnerLine = document.getElementById('winnerLine');
 const attemptCountDisplay = document.getElementById('attemptCountDisplay');
+const winnerBanner = document.getElementById('winnerBanner');
 
 let timerInterval;
 let seconds = 0;
 let currentUser = null;
 let currentProblem = null;
-let attemptCount = 0;
 
 currentYear.textContent = new Date().getFullYear();
 
@@ -39,7 +38,7 @@ window.signupUser = function () {
   auth.createUserWithEmailAndPassword(email, password)
     .then(() => alert('Signup successful!'))
     .catch(err => alert(err.message));
-}
+};
 
 window.loginUser = function () {
   const username = usernameInput.value;
@@ -52,7 +51,7 @@ window.loginUser = function () {
       updateAttemptCount();
     })
     .catch(err => alert(err.message));
-}
+};
 
 window.loadQuestionByDate = async function () {
   const selectedDate = new Date(datePicker.value);
@@ -61,17 +60,16 @@ window.loadQuestionByDate = async function () {
   const category = categorySelect.value;
 
   const url = `https://api.github.com/repos/Vvk1amzn2sd/DSA_practise_vvk/contents/Questions/${month}/${category}`;
-
   const res = await fetch(url);
   const files = await res.json();
 
   const sorted = files.filter(f => f.name.endsWith('.txt') || f.name.endsWith('.md')).sort((a, b) => new Date(a.git_url) - new Date(b.git_url));
 
   problemSelect.innerHTML = '';
-  sorted.forEach((file, idx) => {
+  sorted.forEach(file => {
     const option = document.createElement('option');
     option.value = file.download_url;
-    option.textContent = file.name.replace('.txt', '').replace('.md', '');
+    option.textContent = file.name.replace(/\.(txt|md)$/, '');
     problemSelect.appendChild(option);
   });
 
@@ -80,13 +78,17 @@ window.loadQuestionByDate = async function () {
   const winnersRef = database.ref(`winners/${month}_${day}`);
   winnersRef.once('value').then(snapshot => {
     const data = snapshot.val();
-    if (data && data.username) {
-      winnerLine.textContent = `${data.username} was the winner on ${month} ${day}`;
+    if (data) {
+      const line = ['easy', 'medium', 'hard']
+        .filter(level => data[level])
+        .map(level => `${level}: ${data[level].username} 🏆`)
+        .join(' | ');
+      winnerLine.textContent = line ? `Yesterday's winners — ${line}` : '';
     } else {
       winnerLine.textContent = '';
     }
   });
-}
+};
 
 window.loadSelectedProblem = async function () {
   const url = problemSelect.value;
@@ -94,7 +96,7 @@ window.loadSelectedProblem = async function () {
   const content = await res.text();
   currentProblem = url;
   questionPane.innerHTML = `<h2>${problemSelect.selectedOptions[0].text}</h2><pre>${content}</pre>`;
-}
+};
 
 window.startTimer = function () {
   if (timerInterval) clearInterval(timerInterval);
@@ -104,7 +106,7 @@ window.startTimer = function () {
     seconds++;
     timerDisplay.textContent = `${seconds} sec`;
   }, 1000);
-}
+};
 
 window.submitSolution = function () {
   clearInterval(timerInterval);
@@ -112,10 +114,8 @@ window.submitSolution = function () {
   seconds = 0;
   timerDisplay.textContent = '0 sec';
 
-  let message = `Solution submitted!\nTime: ${timeTaken} sec`;
-  let result = Math.random() > 0.3 ? 'PASS' : 'FAIL';
-  message += `\nResult: ${result}`;
-
+  const result = Math.random() > 0.3 ? 'PASS' : 'FAIL';
+  const message = `Solution submitted!\nTime: ${timeTaken} sec\nResult: ${result}`;
   alert(message);
 
   if (currentUser && currentProblem) {
@@ -128,23 +128,22 @@ window.submitSolution = function () {
       result
     };
     ref.set(submission);
-    attemptCount++;
     updateAttemptCount();
 
     const selectedDate = new Date(datePicker.value);
     const month = selectedDate.toLocaleString('default', { month: 'long' }).toUpperCase();
     const day = selectedDate.getDate();
-    const winnerRef = database.ref(`winners/${month}_${day}`);
+    const winnerRef = database.ref(`winners/${month}_${day}/${categorySelect.value}`);
 
     winnerRef.once('value').then(snapshot => {
       const data = snapshot.val();
       if (!data || timeTaken < data.time) {
         winnerRef.set({ username: submission.username, time: timeTaken });
-        winnerLine.textContent = `${submission.username} was the winner on ${month} ${day}`;
+        winnerBanner.textContent = `${submission.username} is the fastest in ${categorySelect.value}!`;
       }
     });
   }
-}
+};
 
 function updateAttemptCount() {
   if (!currentUser) return;
@@ -155,8 +154,3 @@ function updateAttemptCount() {
     attemptCountDisplay.textContent = `${snapshot.snapshot.val()} attempt(s) today`;
   });
 }
-
-const themeToggle = document.getElementById('themeSwitch');
-themeToggle?.addEventListener('change', () => {
-  document.body.classList.toggle('dark-mode');
-});
