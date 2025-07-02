@@ -74,9 +74,11 @@
         <div id="winnerBanner"></div>
 
         <div id="monacoEditor"></div>
-        <textarea id="stdinInput" rows="3" placeholder="Custom Input (stdin)"></textarea>
-        <button onclick="runCode()">▶️ Run</button>
-        <pre id="runOutput">Output will appear here...</pre>
+        <div class="io-section">
+          <textarea id="stdinInput" placeholder="Custom Input (stdin)"></textarea>
+          <pre id="runOutput">Output will appear here...</pre>
+        </div>
+        <button onclick="runCode()">▶️ Compile & Run</button>
       </div>
     </div>
 
