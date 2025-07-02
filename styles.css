@@ -14,19 +14,20 @@ body {
   font-size: 22px;
   font-family: 'Dancing Script', cursive;
   color: darkred;
-  margin-bottom: 2px;
   margin-top: 4px;
+  margin-bottom: 4px;
+  z-index: 1;
 }
 
 #winnerLine, #liveChallengeBanner {
   text-align: center;
   font-weight: bold;
-  margin: 4px 0;
+  margin: 2px 0;
 }
 
 .auth-section {
   position: absolute;
-  top: 28px;
+  top: 34px;
   left: 12px;
   display: flex;
   gap: 6px;
@@ -55,10 +56,10 @@ body {
   display: flex;
   justify-content: flex-start;
   gap: 10px;
-  padding-left: 8px;
   background-color: #ffdddd;
   padding: 6px 10px;
   border-radius: 6px;
+  z-index: 99;
 }
 
 .calendar-controls input,
@@ -79,8 +80,8 @@ body {
 
 .content-container {
   display: flex;
-  height: calc(100vh - 190px);
-  margin-top: 140px;
+  height: calc(100vh - 180px);
+  margin-top: 135px;
 }
 
 .question-pane {
@@ -88,7 +89,7 @@ body {
   padding: 8px;
   border-right: 1px solid #ccc;
   overflow-y: auto;
-  background: #fdfdfd;
+  background: #fff9f9;
   display: flex;
   flex-direction: column;
 }
@@ -157,7 +158,7 @@ body {
 
 .leaderboard-toggle {
   position: absolute;
-  top: 28px;
+  top: 34px;
   right: 12px;
   display: flex;
   gap: 4px;
