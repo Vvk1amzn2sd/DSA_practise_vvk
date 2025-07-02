@@ -1,4 +1,4 @@
-""import { firebaseApp, database, auth } from './firebase.js';
+import { firebaseApp, database, auth } from './firebase.js';
 
 const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
@@ -162,6 +162,8 @@ window.submitSolution = function () {
   const message = `Solution submitted!\nTime: ${timeTaken} sec\nResult: ${result}`;
   alert(message);
 
+  const source_code = window.editor.getValue();
+
   if (currentUser && currentProblem) {
     const ref = database.ref(`submissions/${currentUser.uid}`).push();
     const submission = {
@@ -185,6 +187,16 @@ window.submitSolution = function () {
         winnerRef.set({ username: submission.username, time: timeTaken });
         winnerBanner.textContent = `${submission.username} is the fastest in ${categorySelect.value}!`;
       }
+    });
+
+    // New: Save full code in Firebase under solutions/{month}/{day}/{category}/{username}
+    const solutionRef = database.ref(`solutions/${month}/${day}/${categorySelect.value}/${submission.username}`);
+    solutionRef.set({
+      time: timeTaken,
+      code: source_code,
+      language: selectedLang,
+      result: result,
+      timestamp: submission.timestamp
     });
   }
 };
