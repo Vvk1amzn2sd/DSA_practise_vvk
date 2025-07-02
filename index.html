@@ -6,7 +6,30 @@
   <title>DSA Challenge Hub</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
   <script type="module" src="main.js"></script>
+  <style>
+    #monacoEditor {
+      width: 100%;
+      height: 75vh;
+      border: 1px solid #ccc;
+    }
+    #languageSelect {
+      margin: 10px 0;
+      padding: 6px;
+    }
+    #stdinInput {
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px;
+    }
+    #runOutput {
+      background: #f0f0f0;
+      padding: 10px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
   <div class="main-container">
@@ -30,7 +53,7 @@
       <input type="date" id="datePicker" onchange="loadQuestionByDate()">
       <select id="category" onchange="loadQuestionByDate()">
         <option value="easy">Easy</option>
-        <option value="medium">Medium</option>a
+        <option value="medium">Medium</option>
         <option value="hard">Hard</option>
       </select>
       <select id="problemSelect" onchange="loadSelectedProblem()">
@@ -48,9 +71,28 @@
           <span id="timerDisplay">0 sec</span>
           <button class="submit-button" onclick="submitSolution()">Submit</button>
         </div>
+        <select id="languageSelect">
+          <option value="java">Java</option>
+          <option value="c">C</option>
+          <option value="cpp">C++</option>
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="ruby">Ruby</option>
+          <option value="csharp">C#</option>
+          <option value="go">Go</option>
+          <option value="php">PHP</option>
+          <option value="swift">Swift</option>
+          <option value="rust">Rust</option>
+          <option value="sql">SQL</option>
+          <option value="assembly">Assembly</option>
+        </select>
         <div id="attemptCountDisplay">0 attempts today</div>
         <div id="winnerBanner"></div>
-        <iframe id="codeEditor" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
+        <div id="monacoEditor"></div>
+        <textarea id="stdinInput" rows="3" placeholder="Custom Input (stdin)"></textarea>
+        <button onclick="runCode()">▶️ Run</button>
+        <pre id="runOutput">Output will appear here...</pre>
       </div>
     </div>
 
@@ -58,5 +100,30 @@
       made with ❤️ by <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
     </div>
   </div>
+
+  <script>
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+    require(['vs/editor/editor.main'], function () {
+      const languageMap = {
+        java: 'java', c: 'c', cpp: 'cpp', python: 'python', javascript: 'javascript', typescript: 'typescript',
+        ruby: 'ruby', csharp: 'csharp', go: 'go', php: 'php', swift: 'swift', rust: 'rust', sql: 'sql', assembly: 'asm'
+      };
+
+      window.editor = monaco.editor.create(document.getElementById('monacoEditor'), {
+        value: '// Write your code here',
+        language: 'java',
+        theme: 'vs',
+        automaticLayout: true,
+        fontSize: 14,
+        minimap: { enabled: false },
+      });
+
+      document.getElementById('languageSelect').addEventListener('change', function () {
+        const selectedLang = this.value;
+        const monacoLang = languageMap[selectedLang] || 'plaintext';
+        monaco.editor.setModelLanguage(window.editor.getModel(), monacoLang);
+      });
+    });
+  </script>
 </body>
 </html>
