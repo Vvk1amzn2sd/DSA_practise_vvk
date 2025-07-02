@@ -4,46 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DSA Challenge Hub</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="main.js"></script>
 </head>
 <body>
-  <div class="top-bar">
-    <label class="theme-toggle">
-      <input type="checkbox" id="themeSwitch" title="Toggle dark mode" />
-      <span class="icon">🌗</span>
-    </label>
-    <div class="leaderboard-controls">
-      <select id="leaderboardType" onchange="toggleLeaderboard()">
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-      </select>
-    </div>
-    <div class="attempt-counter">10 attempts today</div>
-  </div>
-
   <div class="main-container">
     <div class="header">DSA GRIND</div>
-    <div id="winnerLine">🏆 Yesterday's Winner: <span id="yesterdayWinner">Loading...</span></div>
-    <div id="liveChallengeBanner">JULY 1 Challenge Live</div>
+    <div id="winnerLine">Yesterday's Winner: <span id="winnerName">Loading...</span></div>
+    <div id="liveChallengeBanner">JULY 1 Challenge is Live</div>
 
     <div class="auth-section">
-      <input type="text" id="username" placeholder="Username" maxlength="20" />
-      <input type="password" id="password" placeholder="Password (6 chars)" maxlength="6" />
+      <input type="text" id="username" placeholder="Username" maxlength="15">
+      <input type="password" id="password" placeholder="Password" maxlength="6">
       <button onclick="signupUser()">Signup</button>
       <button onclick="loginUser()">Login</button>
     </div>
 
+    <div class="leaderboard-toggle">
+      <button id="dailyLeaderboard" class="active">Daily</button>
+      <button id="weeklyLeaderboard">Weekly</button>
+    </div>
+
     <div class="calendar-controls">
-      <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
+      <input type="date" id="datePicker">
       <select id="category">
         <option value="easy">Easy</option>
         <option value="medium">Medium</option>
         <option value="hard">Hard</option>
       </select>
-      <select id="problemSelect" onchange="loadSelectedProblem()">
+      <select id="problemSelect">
         <option value="">Select Problem</option>
       </select>
     </div>
@@ -54,17 +44,17 @@
       </div>
       <div class="ide-pane">
         <div class="ide-controls">
-          <button class="start-button" onclick="startTimer()" title="Start solving">Start</button>
+          <button class="start-button" onclick="startTimer()">Start</button>
           <span id="timerDisplay">0 sec</span>
-          <button class="submit-button" onclick="submitSolution()" title="Submit your solution">Submit</button>
+          <button class="submit-button" onclick="submitSolution()">Submit</button>
         </div>
+        <div id="attemptCountDisplay">0 attempts today</div>
         <iframe id="codeEditor" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
       </div>
     </div>
 
     <div class="footer">
-      made with <span style="color:purple">❤</span> for Atlas, by <span class="vvk-signature">vvk</span>.
-      <span id="currentYear"></span>
+      made with ❤️ for Atlas, by <span class="vvk-signature">Vivek</span>. <span id="currentYear"></span>
     </div>
   </div>
 </body>
