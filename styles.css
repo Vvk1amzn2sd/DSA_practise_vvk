@@ -14,18 +14,19 @@ body {
   font-size: 22px;
   font-family: 'Dancing Script', cursive;
   color: darkred;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  margin-top: 4px;
 }
 
 #winnerLine, #liveChallengeBanner {
   text-align: center;
   font-weight: bold;
-  margin: 4px 0;a
+  margin: 4px 0;
 }
 
 .auth-section {
   position: absolute;
-  top: 38px;
+  top: 28px;
   left: 12px;
   display: flex;
   gap: 6px;
@@ -48,16 +49,38 @@ body {
 }
 
 .calendar-controls {
+  position: absolute;
+  top: 80px;
+  left: 12px;
   display: flex;
   justify-content: flex-start;
   gap: 10px;
-  margin-bottom: 6px;
   padding-left: 8px;
+  background-color: #ffdddd;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.calendar-controls input,
+.calendar-controls select {
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.calendar-controls button {
+  padding: 5px 10px;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .content-container {
   display: flex;
-  height: calc(100vh - 210px);
+  height: calc(100vh - 190px);
+  margin-top: 140px;
 }
 
 .question-pane {
@@ -74,7 +97,7 @@ body {
   width: 75%;
   display: flex;
   flex-direction: column;
-  margin-top: -40px;
+  margin-top: -10px;
 }
 
 .ide-controls {
@@ -134,7 +157,7 @@ body {
 
 .leaderboard-toggle {
   position: absolute;
-  top: 8px;
+  top: 28px;
   right: 12px;
   display: flex;
   gap: 4px;
