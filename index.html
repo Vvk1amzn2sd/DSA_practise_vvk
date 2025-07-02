@@ -30,7 +30,7 @@
       <input type="date" id="datePicker" onchange="loadQuestionByDate()">
       <select id="category" onchange="loadQuestionByDate()">
         <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
+        <option value="medium">Medium</option>a
         <option value="hard">Hard</option>
       </select>
       <select id="problemSelect" onchange="loadSelectedProblem()">
@@ -49,6 +49,7 @@
           <button class="submit-button" onclick="submitSolution()">Submit</button>
         </div>
         <div id="attemptCountDisplay">0 attempts today</div>
+        <div id="winnerBanner"></div>
         <iframe id="codeEditor" src="https://onecompiler.com/embed/java" allowfullscreen></iframe>
       </div>
     </div>
