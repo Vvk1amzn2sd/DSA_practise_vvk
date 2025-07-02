@@ -13,11 +13,13 @@ const timerDisplay = document.getElementById('timerDisplay');
 const currentYear = document.getElementById('currentYear');
 const liveBanner = document.getElementById('liveChallengeBanner');
 const winnerLine = document.getElementById('winnerLine');
+const attemptCountDisplay = document.getElementById('attemptCountDisplay');
 
 let timerInterval;
 let seconds = 0;
 let currentUser = null;
 let currentProblem = null;
+let attemptCount = 0;
 
 currentYear.textContent = new Date().getFullYear();
 
@@ -25,6 +27,7 @@ auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     document.querySelector('.auth-section').style.display = 'none';
+    updateAttemptCount();
   }
 });
 
@@ -44,7 +47,10 @@ window.loginUser = function () {
   const email = `${username}@dsachallenge.com`;
 
   auth.signInWithEmailAndPassword(email, password)
-    .then(() => alert('Login successful!'))
+    .then(() => {
+      alert('Login successful!');
+      updateAttemptCount();
+    })
     .catch(err => alert(err.message));
 }
 
@@ -122,6 +128,8 @@ window.submitSolution = function () {
       result
     };
     ref.set(submission);
+    attemptCount++;
+    updateAttemptCount();
 
     const selectedDate = new Date(datePicker.value);
     const month = selectedDate.toLocaleString('default', { month: 'long' }).toUpperCase();
@@ -136,6 +144,16 @@ window.submitSolution = function () {
       }
     });
   }
+}
+
+function updateAttemptCount() {
+  if (!currentUser) return;
+  const todayKey = new Date().toISOString().split('T')[0];
+  const countRef = database.ref(`attempts/${currentUser.uid}/${todayKey}`);
+
+  countRef.transaction(current => (current || 0) + 1).then(snapshot => {
+    attemptCountDisplay.textContent = `${snapshot.snapshot.val()} attempt(s) today`;
+  });
 }
 
 const themeToggle = document.getElementById('themeSwitch');
