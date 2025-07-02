@@ -17,12 +17,32 @@ body {
   margin-top: 6px;
   margin-bottom: 6px;
   z-index: 1;
+  position: relative;
+}
+
+.header::after {
+  content: "\1F3C6"; /* Trophy emoji */
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 0;
+  font-size: 22px;
 }
 
 #winnerLine, #liveChallengeBanner {
   text-align: center;
   font-weight: bold;
   margin: 2px 0;
+}
+
+#winnerBanner {
+  text-align: center;
+  font-size: 13px;
+  color: #4b0082;
+  margin: 6px 0;
+  font-style: italic;
+  background-color: #e9e9ff;
+  padding: 4px 0;
+  border-radius: 4px;
 }
 
 .auth-section {
@@ -80,8 +100,8 @@ body {
 
 .content-container {
   display: flex;
-  height: calc(100vh - 180px);
-  margin-top: 130px;
+  height: calc(100vh - 200px);
+  margin-top: 150px;
 }
 
 .question-pane {
@@ -89,7 +109,7 @@ body {
   padding: 8px;
   border-right: 1px solid #ccc;
   overflow-y: auto;
-  background: #f0f0f0; /* slight gray background */
+  background: #f0f0f0;
   display: flex;
   flex-direction: column;
 }
@@ -165,7 +185,7 @@ body {
 }
 
 .leaderboard-toggle button {
-  font-size: 16px; /* 1.5x original size */
+  font-size: 16px;
   padding: 6px 12px;
   cursor: pointer;
   background-color: #005b96;
