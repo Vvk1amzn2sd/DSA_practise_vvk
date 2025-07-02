@@ -1,69 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DSA Challenge Hub</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Monaco Editor -->
   <script src="https://unpkg.com/monaco-editor@0.34.1/min/vs/loader.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- Markdown parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .auth-section {
-      padding: 20px;
+      font-family: sans-serif;
       background: #f5f5f5;
+      margin: 0;
+      padding: 1rem;
     }
-    .ide-container {
-      margin: 20px;
-      padding: 10px;
-    }
-    .controls-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-bottom: 10px;
+    .auth-section, .main-section {
+      margin: 1rem 0;
     }
     #editor {
       width: 100%;
-      height: 400px;
+      height: 300px;
       border: 1px solid #ccc;
+    }
+    .test-case.test-pass { background: #c8f7c5; padding: 6px; margin: 5px 0; }
+    .test-case.test-fail { background: #f7c5c5; padding: 6px; margin: 5px 0; }
+    .controls > * {
+      margin: 0.25rem;
+    }
+    #testResults {
+      display: none;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
+
+  <!-- Authentication Section -->
   <div class="auth-section">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="signupUser()">Sign Up</button>
-    <button onclick="loginUser()">Log In</button>
-    <p id="attemptCountDisplay"></p>
+    <h2>Signup / Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="signupUser()">Signup</button>
+    <button onclick="loginUser()">Login</button>
   </div>
 
-  <div class="ide-container">
-    <div class="controls-row">
-      <input type="date" id="datePicker">
-      <select id="languageSelect">
-        <option value="javascript">JavaScript</option>
-        <option value="python">Python</option>
-        <option value="cpp">C++</option>
-        <option value="java">Java</option>
-        <!-- Add more as needed -->
+  <!-- Main Section -->
+  <div class="main-section">
+    <div id="winnerBanner" style="font-weight: bold; margin-bottom: 1rem;"></div>
+
+    <div class="controls">
+      <label for="datePicker">Select Date:</label>
+      <input type="date" id="datePicker" />
+
+      <label for="difficultySelect">Difficulty:</label>
+      <select id="difficultySelect">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
       </select>
-      <span id="selectedLangDisplay">🟪 JavaScript</span>
-      <button onclick="startTimer()">Start</button>
-      <button onclick="submitSolution()">Submit</button>
+
+      <label for="languageSelect">Language:</label>
+      <select id="languageSelect">
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+        <option value="c">C</option>
+        <option value="javascript">JavaScript</option>
+      </select>
+
+      <button onclick="startTimer()">Start Timer</button>
       <span id="timerDisplay">0 sec</span>
     </div>
+
+    <div id="attemptCountDisplay" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3>Problem</h3>
+    <div id="questionContent" style="background: #fff; padding: 1rem; border: 1px solid #ccc;"></div>
+
+    <h3>Editor</h3>
     <div id="editor"></div>
-    <textarea id="stdinInput" placeholder="Custom Input (stdin)"></textarea>
-    <pre id="runOutput">Output will appear here...</pre>
-    <button onclick="runCode()">▶️ Compile & Run</button>
-    <div id="winnerBanner"></div>
+
+    <h3>Input</h3>
+    <textarea id="stdinInput" placeholder="Custom input..." rows="3" style="width: 100%;"></textarea>
+
+    <div class="controls">
+      <button onclick="runCode()">Run</button>
+      <button onclick="submitSolution()">Submit</button>
+    </div>
+
+    <h3>Output</h3>
+    <pre id="runOutput" style="background: #eef; padding: 1rem;"></pre>
+
+    <div id="testResults">
+      <h3>Test Case Results</h3>
+      <div id="testSummary"></div>
+      <div id="testCases"></div>
+    </div>
   </div>
 
-  <script type="module" src="./main.js"></script>
+  <!-- vy vvk, y u care anyway-->
+  <script src="main.js"></script>
+
 </body>
 </html>
