@@ -1,10 +1,15 @@
 {
   "hosting": {
-    "public": ".",
+    "public": "public",
     "ignore": [
-      "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "dsabackend/**",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      "*.exe",
+      "*.bin",
+      "*.sh"
     ],
     "rewrites": [
       {
@@ -12,18 +17,5 @@
         "destination": "/index.html"
       }
     ]
-  },
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ]
-    }
-  ]
+  }
 }

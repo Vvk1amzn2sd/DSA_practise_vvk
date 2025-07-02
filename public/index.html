@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSA Challenge Hub</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="main.js"></script>
+</head>
+<body>
+  <div class="header">
+    <div class="title">DSA GRIND</div>
+    <div id="liveChallengeBanner" class="sub-heading">Challenge for July 15 is live!</div>
+  </div>
+
+  <div class="top-bar">
+    <div class="auth-section">
+      <input type="email" id="email" placeholder="Email" maxlength="30"/>
+      <input type="password" id="password" placeholder="Password (max 6)" maxlength="6"/>
+      <button onclick="signupUser()">Signup</button>
+      <button onclick="loginUser()">Login</button>
+    </div>
+    <div class="leaderboard-toggle">
+      <button onclick="loadDailyLeaderboard()">🏆 Daily</button>
+      <button onclick="loadWeeklyLeaderboard()">📆 Weekly</button>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="left-pane">
+      <div class="calendar-controls">
+        <input type="date" id="datePicker" onchange="loadQuestionByDate()" />
+        <select id="category" onchange="loadQuestionByDate()">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <select id="problemSelect" onchange="loadSelectedProblem()">
+          <option value="">Select Problem</option>
+        </select>
+      </div>
+      <div id="daily-question" class="question-box">Question will load here.</div>
+    </div>
+
+    <div class="ide-pane">
+      <div class="ide-controls">
+        <select id="languageSelect">
+          <option value="java">Java</option>
+          <option value="c">C</option>
+          <option value="cpp">C++</option>
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="ruby">Ruby</option>
+          <option value="csharp">C#</option>
+          <option value="go">Go</option>
+          <option value="php">PHP</option>
+          <option value="swift">Swift</option>
+          <option value="rust">Rust</option>
+          <option value="sql">SQL</option>
+          <option value="assembly">Assembly</option>
+        </select>
+        <span id="selectedLangDisplay">🟪 Java</span>
+        <button onclick="startTimer()">Start</button>
+        <button class="submit-button" onclick="submitSolution()">Submit</button>
+        <span id="timerDisplay">0 sec</span>
+      </div>
+
+      <div id="monacoEditor"></div>
+      <textarea id="stdinInput" placeholder="Custom Input (stdin)"></textarea>
+      <pre id="runOutput">Output will appear here...</pre>
+      <button onclick="runCode()">▶️ Compile & Run</button>
+
+      <div id="attemptCountDisplay">0 attempts today</div>
+      <div id="winnerBanner"></div>
+    </div>
+  </div>
+
+  <div id="winnerLine"></div>
+
+  <div class="footer">
+    made with ❤️ by <span class="vvk-signature">vvk</span>. <span id="currentYear"></span>
+  </div>
+</body>
+</html>

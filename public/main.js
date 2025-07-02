@@ -1,6 +1,6 @@
 import { firebaseApp, database, auth } from './firebase.js';
 
-const usernameInput = document.getElementById('username');
+const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const datePicker = document.getElementById('datePicker');
 const problemSelect = document.getElementById('problemSelect');
@@ -12,6 +12,8 @@ const liveBanner = document.getElementById('liveChallengeBanner');
 const winnerLine = document.getElementById('winnerLine');
 const attemptCountDisplay = document.getElementById('attemptCountDisplay');
 const winnerBanner = document.getElementById('winnerBanner');
+const langSelector = document.getElementById("languageSelect");
+const selectedLangDisplay = document.getElementById("selectedLangDisplay");
 
 let timerInterval;
 let seconds = 0;
@@ -20,21 +22,18 @@ let currentProblem = null;
 
 currentYear.textContent = new Date().getFullYear();
 
-// Judge0 language map
-window.selectedLang = "java";
+window.selectedLang = langSelector.value;
 const langMap = {
   java: 62, cpp: 54, c: 50, python: 71, javascript: 63, typescript: 74,
   ruby: 72, csharp: 51, go: 60, php: 68, swift: 83, rust: 73,
   sql: 82, assembly: 86
 };
 
-const langSelector = document.getElementById("languageSelector");
-if (langSelector) {
-  langSelector.addEventListener("change", () => {
-    window.selectedLang = langSelector.value;
-    document.getElementById("currentLangDisplay").textContent = langSelector.value;
-  });
-}
+langSelector.addEventListener("change", () => {
+  window.selectedLang = langSelector.value;
+  selectedLangDisplay.textContent = `🟪 ${langSelector.options[langSelector.selectedIndex].text}`;
+  monaco.editor.setModelLanguage(window.editor.getModel(), window.selectedLang);
+});
 
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -45,23 +44,24 @@ auth.onAuthStateChanged(user => {
 });
 
 window.signupUser = function () {
-  const username = usernameInput.value;
+  const email = emailInput.value;
   const password = passwordInput.value;
-  const email = `${username}@dsachallenge.com`;
 
   auth.createUserWithEmailAndPassword(email, password)
-    .then(() => alert('Signup successful!'))
+    .then(() => {
+      alert('Signup successful! Enjoy the DSA challenges.');
+      location.reload();
+    })
     .catch(err => alert(err.message));
 };
 
 window.loginUser = function () {
-  const username = usernameInput.value;
+  const email = emailInput.value;
   const password = passwordInput.value;
-  const email = `${username}@dsachallenge.com`;
 
   auth.signInWithEmailAndPassword(email, password)
     .then(() => {
-      alert('Login successful!');
+      alert('Welcome to DSA GRIND!');
       updateAttemptCount();
     })
     .catch(err => alert(err.message));
@@ -77,7 +77,8 @@ window.loadQuestionByDate = async function () {
   const res = await fetch(url);
   const files = await res.json();
 
-  const sorted = files.filter(f => f.name.endsWith('.txt') || f.name.endsWith('.md')).sort((a, b) => new Date(a.git_url) - new Date(b.git_url));
+  const sorted = files.filter(f => f.name.endsWith('.txt') || f.name.endsWith('.md'))
+    .sort((a, b) => new Date(a.name.split('_')[0]) - new Date(b.name.split('_')[0]));
 
   problemSelect.innerHTML = '';
   sorted.forEach(file => {
@@ -109,7 +110,7 @@ window.loadSelectedProblem = async function () {
   const res = await fetch(url);
   const content = await res.text();
   currentProblem = url;
-  questionPane.innerHTML = `<h2>${problemSelect.selectedOptions[0].text}</h2><pre>${content}</pre>`;
+  questionPane.innerHTML = `<h2>${problemSelect.selectedOptions[0].text}</h2><pre style="white-space: pre-wrap;">${content}</pre>`;
 };
 
 window.startTimer = function () {
@@ -152,52 +153,73 @@ window.runCode = async function () {
   }
 };
 
-window.submitSolution = function () {
+window.submitSolution = async function () {
   clearInterval(timerInterval);
   const timeTaken = seconds;
   seconds = 0;
   timerDisplay.textContent = '0 sec';
 
-  const result = Math.random() > 0.3 ? 'PASS' : 'FAIL';
-  const message = `Solution submitted!\nTime: ${timeTaken} sec\nResult: ${result}`;
-  alert(message);
-
   const source_code = window.editor.getValue();
+  const stdin = document.getElementById('stdinInput').value;
+  const language_id = langMap[window.selectedLang];
 
-  if (currentUser && currentProblem) {
-    const ref = database.ref(`submissions/${currentUser.uid}`).push();
-    const submission = {
-      time: timeTaken,
-      problem: currentProblem,
-      username: currentUser.email.split('@')[0],
-      timestamp: Date.now(),
-      result
-    };
-    ref.set(submission);
-    updateAttemptCount();
-
-    const selectedDate = new Date(datePicker.value);
-    const month = selectedDate.toLocaleString('default', { month: 'long' }).toUpperCase();
-    const day = selectedDate.getDate();
-    const winnerRef = database.ref(`winners/${month}_${day}/${categorySelect.value}`);
-
-    winnerRef.once('value').then(snapshot => {
-      const data = snapshot.val();
-      if (!data || timeTaken < data.time) {
-        winnerRef.set({ username: submission.username, time: timeTaken });
-        winnerBanner.textContent = `${submission.username} is the fastest in ${categorySelect.value}!`;
-      }
+  try {
+    const response = await fetch("https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+        "x-rapidapi-key": "1ac6d75981msh80a21e7c5ff6a9dp18f155jsn216aa37e0e81"
+      },
+      body: JSON.stringify({
+        language_id,
+        source_code,
+        stdin
+      })
     });
 
-    // New: Save full code in Firebase under solutions/{month}/{day}/{category}/{username}
-    const solutionRef = database.ref(`solutions/${month}/${day}/${categorySelect.value}/${submission.username}`);
-    solutionRef.set({
-      time: timeTaken,
-      code: source_code,
-      language: selectedLang,
-      result: result,
-      timestamp: submission.timestamp
-    });
+    const data = await response.json();
+    const result = data.stdout && data.stderr === null && data.status?.id === 3 ? 'PASS' : 'FAIL';
+
+    const message = `Solution submitted!\nTime: ${timeTaken} sec\nResult: ${result}`;
+    alert(message);
+
+    if (currentUser && currentProblem) {
+      const ref = database.ref(`submissions/${currentUser.uid}`).push();
+      const submission = {
+        time: timeTaken,
+        problem: currentProblem,
+        username: currentUser.email.split('@')[0],
+        timestamp: Date.now(),
+        result
+      };
+      ref.set(submission);
+      updateAttemptCount();
+
+      const selectedDate = new Date(datePicker.value);
+      const month = selectedDate.toLocaleString('default', { month: 'long' }).toUpperCase();
+      const day = selectedDate.getDate();
+      const winnerRef = database.ref(`winners/${month}_${day}/${categorySelect.value}`);
+
+      winnerRef.once('value').then(snapshot => {
+        const data = snapshot.val();
+        if (!data || timeTaken < data.time) {
+          winnerRef.set({ username: submission.username, time: timeTaken });
+          winnerBanner.textContent = `${submission.username} is the fastest in ${categorySelect.value}!`;
+        }
+      });
+
+      const solutionRef = database.ref(`solutions/${month}/${day}/${categorySelect.value}/${submission.username}`);
+      solutionRef.set({
+        time: timeTaken,
+        code: source_code,
+        language: selectedLang,
+        result: result,
+        timestamp: submission.timestamp
+      });
+    }
+  } catch (err) {
+    alert('Submission failed: ' + err.message);
   }
 };
 
